@@ -8,6 +8,7 @@ import (
 type Mobile struct {
 	Value string `binding:"number,mobile"`
 	Set   bool
+	Mask  bool
 }
 
 func (mobile Mobile) IsValid() bool {
@@ -15,10 +16,13 @@ func (mobile Mobile) IsValid() bool {
 }
 
 func (mobile *Mobile) UnmarshalJSON(data []byte) error {
-	result := gjson.GetBytes(data, "Value")
-	if result.Exists() {
-		mobile.Value = result.String()
+	results := gjson.GetManyBytes(data, "Value", "Mask")
+	if results[0].Exists() {
+		mobile.Value = results[0].String()
 		mobile.Set = true
+	}
+	if results[1].Exists() {
+		mobile.Mask = results[1].Bool()
 	}
 	return nil
 }

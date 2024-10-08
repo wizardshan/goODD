@@ -2,7 +2,6 @@ package domain
 
 import (
 	"encoding/json"
-	"errors"
 	"github.com/tidwall/gjson"
 	"regexp"
 )
@@ -19,11 +18,10 @@ func (mobile Mobile) IsValid() bool {
 func (mobile *Mobile) UnmarshalJSON(data []byte) error {
 	if data[0] == '{' {
 		result := gjson.GetBytes(data, "Value")
-		if !result.Exists() {
-			return errors.New("`Value` key not found")
+		if result.Exists() {
+			mobile.Value = result.String()
+			mobile.Set = true
 		}
-		mobile.Value = result.String()
-		mobile.Set = true
 		return nil
 	}
 

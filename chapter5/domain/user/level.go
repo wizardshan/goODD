@@ -2,7 +2,6 @@ package user
 
 import (
 	"encoding/json"
-	"errors"
 	"github.com/tidwall/gjson"
 )
 
@@ -14,11 +13,10 @@ type Level struct {
 func (level *Level) UnmarshalJSON(data []byte) error {
 	if data[0] == '{' {
 		result := gjson.GetBytes(data, "Value")
-		if !result.Exists() {
-			return errors.New("`Value` key not found")
+		if result.Exists() {
+			level.Value = result.Int()
+			level.Set = true
 		}
-		level.Value = result.Int()
-		level.Set = true
 		return nil
 	}
 

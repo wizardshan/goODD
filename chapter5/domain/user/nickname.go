@@ -2,7 +2,6 @@ package user
 
 import (
 	"encoding/json"
-	"errors"
 	"github.com/tidwall/gjson"
 )
 
@@ -14,11 +13,10 @@ type Nickname struct {
 func (nickname *Nickname) UnmarshalJSON(data []byte) error {
 	if data[0] == '{' {
 		result := gjson.GetBytes(data, "Value")
-		if !result.Exists() {
-			return errors.New("`Value` key not found")
+		if result.Exists() {
+			nickname.Value = result.String()
+			nickname.Set = true
 		}
-		nickname.Value = result.String()
-		nickname.Set = true
 		return nil
 	}
 

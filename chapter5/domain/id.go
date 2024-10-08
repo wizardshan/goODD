@@ -2,7 +2,6 @@ package domain
 
 import (
 	"encoding/json"
-	"errors"
 	"github.com/tidwall/gjson"
 )
 
@@ -14,11 +13,10 @@ type ID struct {
 func (id *ID) UnmarshalJSON(data []byte) error {
 	if data[0] == '{' {
 		result := gjson.GetBytes(data, "Value")
-		if !result.Exists() {
-			return errors.New("`Value` key not found")
+		if result.Exists() {
+			id.Value = result.Int()
+			id.Set = true
 		}
-		id.Value = result.Int()
-		id.Set = true
 		return nil
 	}
 
