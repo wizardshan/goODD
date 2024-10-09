@@ -15,7 +15,6 @@ type Level struct {
 	Value int64 `binding:"oneof=0 10 20 30"`
 	Desc  string
 	Set   bool
-	Mask  bool
 }
 
 func NewLevel(v int64) Level {
@@ -41,28 +40,21 @@ func (level Level) DescMapping() map[int64]string {
 	}
 }
 
-func (level Level) IsMask() bool {
-	return level.Mask
-}
-
 func (level Level) IsSet() bool {
 	return level.Set
 }
 
-func (level Level) IsPresent(f func(v int64)) {
+func (level Level) IsPresent(f func(v int64, desc string)) {
 	if level.Set {
-		f(level.Value)
+		f(level.Value, level.Desc)
 	}
 }
 
 func (level *Level) UnmarshalJSON(data []byte) error {
-	results := gjson.GetManyBytes(data, "Value", "Mask")
-	if results[0].Exists() {
-		level.Value = results[0].Int()
+	result := gjson.GetBytes(data, "Value")
+	if result.Exists() {
+		level.Value = result.Int()
 		level.Set = true
-	}
-	if results[1].Exists() {
-		level.Mask = results[1].Bool()
 	}
 	return nil
 }

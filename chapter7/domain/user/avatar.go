@@ -7,15 +7,10 @@ import (
 type Avatar struct {
 	Value string
 	Set   bool
-	Mask  bool
 }
 
 func NewAvatar(v string) Avatar {
 	return Avatar{Value: v, Set: true}
-}
-
-func (avatar Avatar) IsMask() bool {
-	return avatar.Mask
 }
 
 func (avatar Avatar) IsSet() bool {
@@ -29,13 +24,10 @@ func (avatar Avatar) IsPresent(f func(v string)) {
 }
 
 func (avatar *Avatar) UnmarshalJSON(data []byte) error {
-	results := gjson.GetManyBytes(data, "Value", "Mask")
-	if results[0].Exists() {
-		avatar.Value = results[0].String()
+	result := gjson.GetBytes(data, "Value")
+	if result.Exists() {
+		avatar.Value = result.String()
 		avatar.Set = true
-	}
-	if results[1].Exists() {
-		avatar.Mask = results[1].Bool()
 	}
 	return nil
 }

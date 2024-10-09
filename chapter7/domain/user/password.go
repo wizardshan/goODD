@@ -24,9 +24,9 @@ func (password Password) IsPresent(f func(v string)) {
 }
 
 func (password *Password) UnmarshalJSON(data []byte) error {
-	results := gjson.GetManyBytes(data, "Value", "Mask")
-	if results[0].Exists() {
-		password.Value = results[0].String()
+	result := gjson.GetBytes(data, "Value")
+	if result.Exists() {
+		password.Value = result.String()
 		password.Set = true
 	}
 	return nil

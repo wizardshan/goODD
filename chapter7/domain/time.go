@@ -30,13 +30,10 @@ func (t Time) IsPresent(f func(v time.Time)) {
 }
 
 func (t *Time) UnmarshalJSON(data []byte) error {
-	results := gjson.GetManyBytes(data, "Value", "Mask")
-	if results[0].Exists() {
-		t.Value = results[0].Time()
+	result := gjson.GetBytes(data, "Value")
+	if result.Exists() {
+		t.Value = result.Time()
 		t.Set = true
-	}
-	if results[1].Exists() {
-		t.Mask = results[1].Bool()
 	}
 	return nil
 }

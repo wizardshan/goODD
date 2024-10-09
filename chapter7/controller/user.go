@@ -30,10 +30,8 @@ func (ctr *User) One(c *gin.Context) (response.Data, error) {
 	if err := c.ShouldBind(req); err != nil {
 		return nil, err
 	}
-
-	qryUser := req.Mapper()
-	domUser := ctr.repo.Fetch(c.Request.Context(), qryUser)
-	return domUser.Mapper(qryUser), nil
+	domUser := ctr.repo.FetchWithFields(c.Request.Context(), req.ID.Value, c.QueryMap("Fields"))
+	return domUser.Mapper(), nil
 }
 
 func (ctr *User) Many(c *gin.Context) (response.Data, error) {

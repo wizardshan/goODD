@@ -11,15 +11,10 @@ type HashID struct {
 	ID       int64 `form:"-"`
 	category int64
 	Set      bool
-	Mask     bool
 }
 
 func NewHashID(v string) HashID {
 	return HashID{Value: v, Set: true}
-}
-
-func (hashID HashID) IsMask() bool {
-	return hashID.Mask
 }
 
 func (hashID HashID) IsSet() bool {
@@ -51,16 +46,13 @@ func (hashID HashID) Decode() (err error) {
 }
 
 func (hashID *HashID) UnmarshalJSON(data []byte) error {
-	results := gjson.GetManyBytes(data, "Value", "Mask")
-	if results[0].Exists() {
-		hashID.Value = results[0].String()
+	result := gjson.GetBytes(data, "Value")
+	if result.Exists() {
+		hashID.Value = result.String()
 		if err := hashID.Decode(); err != nil {
 			return err
 		}
 		hashID.Set = true
-	}
-	if results[1].Exists() {
-		hashID.Mask = results[1].Bool()
 	}
 	return nil
 }

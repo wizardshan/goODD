@@ -17,8 +17,13 @@ func NewUser(db *ent.Client) *User {
 	return repo
 }
 
-func (repo *User) Get(ctx context.Context, id int64) domain.User {
-	return repo.db.User.Query().Where(user.ID(id)).FirstX(ctx).Mapper()
+func (repo *User) FetchWithFields(ctx context.Context, id int64, fields domain.Fields) domain.User {
+	query := repo.db.User.Query()
+	names, ok := fields.SnakeCaseNames(user.Label)
+	if ok {
+		query.Select(names...)
+	}
+	return query.Where(user.ID(id)).FirstX(ctx).MapperWithFields(fields)
 }
 
 func (repo *User) Fetch(ctx context.Context, qryUser domain.User) domain.User {
@@ -41,7 +46,7 @@ func (repo *User) query(qryUser domain.User) *ent.UserQuery {
 	qryUser.Mobile.IsPresent(func(v string) { query.Where(user.Mobile(v)) })
 	qryUser.Password.IsPresent(func(v string) { query.Where(user.Password(v)) })
 	qryUser.Age.IsPresent(func(v int64) { query.Where(user.Age(v)) })
-	qryUser.Level.IsPresent(func(v int64) { query.Where(user.Level(v)) })
+	qryUser.Level.IsPresent(func(v int64, _ string) { query.Where(user.Level(v)) })
 	qryUser.Nickname.IsPresent(func(v string) { query.Where(user.Nickname(v)) })
 	qryUser.Avatar.IsPresent(func(v string) { query.Where(user.Avatar(v)) })
 	qryUser.Bio.IsPresent(func(v string) { query.Where(user.Bio(v)) })
