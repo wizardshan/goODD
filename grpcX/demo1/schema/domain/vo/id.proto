@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package vo;
+
+option go_package = "demo1/domain/vo";
+
+import "buf/validate/validate.proto";
+
+message ID {
+  int64 Value = 1 [(buf.validate.field).int64.gte = 1];
+}

@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package rpc;
+
+option go_package = "demo1/rpc";
+
+import "domain/vo/id.proto";
+
+message UserGetRequest {
+  vo.ID ID = 1;
+}
+
+message UserGetResponse {
+  vo.ID ID = 1;
+}
+
+service User {
+  rpc Get (rpc.UserGetRequest) returns (rpc.UserGetResponse) {}
+}

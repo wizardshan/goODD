@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package user;
+
+option go_package = "demo1/domain/user";
+
+message Nickname {
+  string Value = 1;
+}
