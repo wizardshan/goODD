@@ -9,5 +9,5 @@ type SmsCaptchaV2 struct {
 }
 
 type SmsCaptcha struct {
-	MobileField `binding:"required"`
+	MobileField
 }

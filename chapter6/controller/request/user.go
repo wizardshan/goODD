@@ -5,47 +5,41 @@ import (
 	"goODD/chapter6/domain/vo"
 )
 
-type UserLogin struct {
-	Mobile vo.Mobile
-}
-
-func (req UserLogin) Validate() error {
-	if err := req.Mobile.Validate(); err != nil {
-		return err
-	}
-	return nil
-}
-
 type UserOne struct {
 	ID vo.ID
 }
 
-func (req UserOne) Validate() error {
-	if err := req.ID.Validate(); err != nil {
-		return err
-	}
-	return nil
-}
-
 type UserMany struct {
-	Mobile   vo.Mobile
-	Age      user.Age
-	Level    user.Level
-	Nickname user.Nickname
+	Mobile   vo.Mobile     `binding:"omitempty"`
+	StartAge user.Age      `binding:"omitempty"`
+	EndAge   user.Age      `binding:"omitempty,gtfield=Start"` // 不起作用，struct类型默认只支持time类型 需要修改源码 baked_in.go isGtField
+	Levels   user.Levels   `binding:"omitempty,dive"`
+	Nickname user.Nickname `binding:"omitempty"`
 }
 
-func (req UserMany) Validate() error {
-	if err := req.Mobile.ValidateOmit(); err != nil {
-		return err
-	}
-	if err := req.Age.RangeValidateOmit(); err != nil {
-		return err
-	}
-	if err := req.Level.MultiValidateOmit(); err != nil {
-		return err
-	}
-	if err := req.Nickname.FuzzyValidateOmit(); err != nil {
-		return err
-	}
-	return nil
+type UserLogin struct {
+	Mobile   vo.Mobile
+	Password user.Password
+}
+
+type UserSmsRegister struct {
+	Mobile  vo.Mobile
+	Captcha vo.Captcha
+}
+
+type UserRegister struct {
+	Mobile   vo.Mobile
+	Password user.Password
+}
+
+type UserModify struct {
+	ID       vo.ID
+	Age      user.Age
+	Nickname user.Nickname
+	Avatar   user.Avatar
+	Bio      user.Bio
+}
+
+type UserCash struct {
+	Amount user.Amount
 }

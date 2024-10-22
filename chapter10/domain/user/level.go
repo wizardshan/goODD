@@ -1,8 +1,7 @@
 package user
 
 import (
-	"goODD/chapter10/domain/vo"
-	"goODD/chapter10/pkg/validator"
+	"chapter10/rpc/domain/user"
 )
 
 const (
@@ -12,12 +11,28 @@ const (
 	LevelPlatinum = 30
 )
 
-type Level struct {
-	vo.Int64Multi
-	Desc string
+type Levels []*user.Level
+
+func (o Levels) IsPresent(f func(v []int64)) {
+	if len(o) != 0 {
+		f(o.Values())
+	}
 }
 
-func (o Level) GetDesc() string {
+func (o Levels) Values() []int64 {
+	values := make([]int64, len(o))
+	for i, level := range o {
+		values[i] = level.Value
+	}
+	return values
+}
+
+type Level struct {
+	user.Level
+	Set bool
+}
+
+func (o *Level) Desc() string {
 	mapping := map[int64]string{
 		LevelNormal:   "普通",
 		LevelSilver:   "白银",
@@ -31,25 +46,19 @@ func (o Level) GetDesc() string {
 	return "未知"
 }
 
-func (o Level) validate(v int64) error {
-	return validator.Var(v, "oneof=0 10 20 30")
-}
-
-func (o Level) Validate() error {
-	return o.validate(o.Value)
-}
-
-func (o Level) ValidateOmit() error {
+func (o *Level) IsPresent(f func(v int64)) {
 	if o.Set {
-		return o.validate(o.Value)
+		f(o.Value)
 	}
-	return nil
 }
 
-func (o Level) MultiValidate() error {
-	return o.Int64Multi.MultiValidate(o.validate)
+func (o *Level) SetTo(v int64) {
+	o.Set = true
+	o.Value = v
 }
 
-func (o Level) MultiValidateOmit() error {
-	return o.Int64Multi.MultiValidateOmit(o.validate)
+func (o *Level) SetToPb(v *user.Level) {
+	if v != nil {
+		o.SetTo(v.Value)
+	}
 }

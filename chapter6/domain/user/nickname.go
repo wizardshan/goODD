@@ -1,64 +1,34 @@
 package user
 
 import (
-	"errors"
 	"github.com/tidwall/gjson"
-	"goODD/chapter6/pkg/validator"
 )
 
 type Nickname struct {
-	Value   string
-	Keyword string
-
-	Set bool
+	Value string `binding:"min=2,max=10"`
+	Set   bool
 }
 
-func (o Nickname) validate(v string) error {
-	return validator.Var(v, "min=2,max=10")
-}
-
-func (o Nickname) Validate() error {
-	return o.validate(o.Value)
-}
-
-func (o Nickname) ValidateOmit() error {
-	if o.Value != "" {
-		return o.validate(o.Value)
+func (o *Nickname) IsPresent(f func(v string)) {
+	if o.Set {
+		f(o.Value)
 	}
-	return nil
 }
 
-func (o Nickname) FuzzyValidate() error {
-	if o.Keyword == "" {
-		return errors.New("模糊关键词不能为空")
-	}
-	return o.validate(o.Keyword)
-}
-
-func (o Nickname) FuzzyValidateOmit() error {
-	if !o.Set {
-		return nil
-	}
-	if o.Keyword == "" {
-		return errors.New("模糊关键词不能为空")
-	}
-	return o.validate(o.Keyword)
+func (o *Nickname) SetTo(v string) {
+	o.Set = true
+	o.Value = v
 }
 
 func (o *Nickname) UnmarshalJSON(data []byte) error {
 	if data[0] != '{' {
-		o.Value = gjson.ParseBytes(data).String()
+		o.SetTo(gjson.ParseBytes(data).String())
 		return nil
 	}
 
-	results := gjson.GetManyBytes(data, "Value", "Keyword")
-	if results[0].Exists() {
-		o.Value = results[0].String()
-		return nil
-	}
-	if results[1].Exists() {
-		o.Keyword = results[1].String()
-		o.Set = true
+	result := gjson.GetBytes(data, "Value")
+	if result.Exists() {
+		o.SetTo(result.String())
 	}
 	return nil
 }

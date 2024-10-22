@@ -1,8 +1,8 @@
 package repository
 
 import (
+	"chapter10/repository/ent"
 	"context"
-	"goODD/chapter10/repository/ent"
 
 	"github.com/pkg/errors"
 )

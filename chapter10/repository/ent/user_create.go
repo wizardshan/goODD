@@ -6,7 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"goODD/chapter10/repository/ent/user"
+	"chapter10/repository/ent/user"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"

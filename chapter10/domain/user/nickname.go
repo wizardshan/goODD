@@ -1,33 +1,27 @@
 package user
 
 import (
-	"goODD/chapter10/domain/vo"
-	"goODD/chapter10/pkg/validator"
+	"chapter10/rpc/domain/user"
 )
 
 type Nickname struct {
-	vo.StringFuzzy
+	user.Nickname
+	Set bool
 }
 
-func (o Nickname) validate(v string) error {
-	return validator.Var(v, "min=2,max=10")
-}
-
-func (o Nickname) Validate() error {
-	return o.validate(o.Value)
-}
-
-func (o Nickname) ValidateOmit() error {
+func (o *Nickname) IsPresent(f func(v string)) {
 	if o.Set {
-		return o.validate(o.Value)
+		f(o.Value)
 	}
-	return nil
 }
 
-func (o Nickname) FuzzyValidate() error {
-	return o.StringFuzzy.FuzzyValidate(o.validate)
+func (o *Nickname) SetTo(v string) {
+	o.Set = true
+	o.Value = v
 }
 
-func (o Nickname) FuzzyValidateOmit() error {
-	return o.StringFuzzy.FuzzyValidateOmit(o.validate)
+func (o *Nickname) SetToPb(v *user.Nickname) {
+	if v != nil {
+		o.SetTo(v.Value)
+	}
 }

@@ -4,8 +4,8 @@ package ent
 
 import (
 	"context"
-	"goODD/chapter10/repository/ent/predicate"
-	"goODD/chapter10/repository/ent/user"
+	"chapter10/repository/ent/predicate"
+	"chapter10/repository/ent/user"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"

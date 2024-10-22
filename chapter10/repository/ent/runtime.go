@@ -3,8 +3,8 @@
 package ent
 
 import (
-	"goODD/chapter10/repository/ent/schema"
-	"goODD/chapter10/repository/ent/user"
+	"chapter10/repository/ent/schema"
+	"chapter10/repository/ent/user"
 	"time"
 )
 

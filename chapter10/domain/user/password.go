@@ -1,61 +1,37 @@
 package user
 
 import (
-	"errors"
-	"github.com/tidwall/gjson"
-	"goODD/chapter10/domain/vo"
-	"goODD/chapter10/pkg/crypt"
-	"goODD/chapter10/pkg/validator"
+	"chapter10/pkg/crypt"
+	"chapter10/rpc/domain/user"
 )
 
 type Password struct {
-	vo.StringValue
-	ReValue   string
-	HashValue vo.StringValue
+	user.Password
+	Set       bool
+	HashValue string
 }
 
-func (o Password) Encode() string {
-	return crypt.PasswordHash(o.Value)
+func (o *Password) Encode() {
+	o.HashValue = crypt.PasswordHash(o.Value)
 }
 
-func (o Password) Verify(v string) bool {
-	return crypt.PasswordVerify(v, o.HashValue.Value)
+func (o *Password) Verify(v string) bool {
+	return crypt.PasswordVerify(v, o.HashValue)
 }
 
-func (o Password) ValidateRepeat() error {
-	if o.Value != o.ReValue {
-		return errors.New("两次密码不一致")
-	}
-	return nil
-}
-
-func (o Password) validate(v string) error {
-	return validator.Var(v, "min=6,max=20")
-}
-
-func (o Password) Validate() error {
-	return o.validate(o.Value)
-}
-
-func (o Password) ValidateOmit() error {
+func (o *Password) IsPresent(f func(v string)) {
 	if o.Set {
-		return o.validate(o.Value)
+		f(o.Value)
 	}
-	return nil
 }
 
-func (o *Password) UnmarshalJSON(data []byte) error {
-	if data[0] != '{' {
-		o.SetTo(gjson.ParseBytes(data).String())
-		return nil
-	}
+func (o *Password) SetTo(v string) {
+	o.Set = true
+	o.Value = v
+}
 
-	results := gjson.GetManyBytes(data, "Value", "ReValue")
-	if results[0].Exists() {
-		o.SetTo(results[0].String())
+func (o *Password) SetToPb(v *user.Password) {
+	if v != nil {
+		o.SetTo(v.Value)
 	}
-	if results[1].Exists() {
-		o.ReValue = results[1].String()
-	}
-	return nil
 }

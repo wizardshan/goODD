@@ -1,19 +1,19 @@
 package user
 
 import (
+	"chapter10/pkg/idx"
+	"chapter10/rpc/domain/user"
 	"errors"
-	"goODD/chapter10/domain/vo"
-	"goODD/chapter10/pkg/idx"
-	"goODD/chapter10/pkg/validator"
 )
 
 type HashID struct {
-	vo.StringValue
+	user.HashID
+	Set      bool
 	ID       int64
 	category int64
 }
 
-func (o HashID) Category() int64 {
+func (o *HashID) Category() int64 {
 	return idx.HashIDCategoryUser
 }
 
@@ -31,17 +31,19 @@ func (o *HashID) Decode() (err error) {
 	return
 }
 
-func (o HashID) validate(v string) error {
-	return validator.Var(v, "max=200")
-}
-
-func (o HashID) Validate() error {
-	return o.validate(o.Value)
-}
-
-func (o HashID) ValidateOmit() error {
+func (o *HashID) IsPresent(f func(v string)) {
 	if o.Set {
-		return o.validate(o.Value)
+		f(o.Value)
 	}
-	return nil
+}
+
+func (o *HashID) SetTo(v string) {
+	o.Set = true
+	o.Value = v
+}
+
+func (o *HashID) SetToPb(v *user.HashID) {
+	if v != nil {
+		o.SetTo(v.Value)
+	}
 }

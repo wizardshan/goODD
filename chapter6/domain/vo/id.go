@@ -1,41 +1,32 @@
 package vo
 
-import (
-	"errors"
-	"github.com/tidwall/gjson"
-)
+import "github.com/tidwall/gjson"
 
 type ID struct {
-	Value int64
+	Value int64 `binding:"min=1"`
+	Set   bool
 }
 
-func (o ID) validate(v int64) error {
-	if v < 1 {
-		return errors.New("ID必须大于等于1")
+func (o *ID) IsPresent(f func(v int64)) {
+	if o.Set {
+		f(o.Value)
 	}
-	return nil
 }
 
-func (o ID) Validate() error {
-	return o.validate(o.Value)
-}
-
-func (o ID) ValidateOmit() error {
-	if o.Value != 0 {
-		return o.validate(o.Value)
-	}
-	return nil
+func (o *ID) SetTo(v int64) {
+	o.Set = true
+	o.Value = v
 }
 
 func (o *ID) UnmarshalJSON(data []byte) error {
 	if data[0] != '{' {
-		o.Value = gjson.ParseBytes(data).Int()
+		o.SetTo(gjson.ParseBytes(data).Int())
 		return nil
 	}
 
 	result := gjson.GetBytes(data, "Value")
 	if result.Exists() {
-		o.Value = result.Int()
+		o.SetTo(result.Int())
 	}
 	return nil
 }

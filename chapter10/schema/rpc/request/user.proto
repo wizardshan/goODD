@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+package request;
+
+option go_package = "chapter10/rpc/request";
+
+import "buf/validate/validate.proto";
+import "rpc/domain/field.proto";
+import "rpc/domain/user/field.proto";
+
+message UserOne {
+  vo.ID ID = 1 [(buf.validate.field).required = true];
+}
+
+message UserMany {
+  vo.Mobile Mobile = 1 [(buf.validate.field).ignore_empty = true];
+  user.Age StartAge = 2 [(buf.validate.field).ignore_empty = true];
+  user.Age EndAge = 3 [(buf.validate.field).ignore_empty = true];
+  option (buf.validate.message).cel = {
+    id: "event.start_age_before_end_age",
+    message: "Start age must be before end age",
+    expression: "this.StartAge.Value == 0 || this.EndAge.Value == 0 || this.StartAge.Value < this.EndAge.Value",
+  };
+  repeated user.Level Levels = 4 [(buf.validate.field).ignore_empty = true];
+  user.Nickname Nickname = 5 [(buf.validate.field).ignore_empty = true];
+}
+
+message UserLogin {
+  vo.Mobile Mobile = 1 [(buf.validate.field).required = true];
+  user.Password Password = 2 [(buf.validate.field).required = true];
+}
+
+message UserSmsRegister  {
+  vo.Mobile Mobile = 1 [(buf.validate.field).required = true];
+  vo.Captcha Captcha  = 2 [(buf.validate.field).required = true];
+}
+
+message UserRegister {
+  vo.Mobile Mobile = 1 [(buf.validate.field).required = true];
+  user.Password Password  = 2 [(buf.validate.field).required = true];
+}
+
+message UserModify {
+  vo.ID ID = 1 [(buf.validate.field).required = true];
+  user.Age Age = 2 [(buf.validate.field).required = true];
+  user.Nickname  Nickname = 3 [(buf.validate.field).required = true];
+  user.Avatar Avatar = 4 [(buf.validate.field).required = true];
+  user.Bio Bio  = 5 [(buf.validate.field).required = true];
+}
+
+message UserCash {
+  user.Amount Amount = 1 [(buf.validate.field).required = true];
+}
+
+
+
+//message Users {
+//  vo.Mobile Mobile = 1 [(buf.validate.field).ignore_empty = true];
+//  user.Age Age = 2 [(buf.validate.field).ignore_empty = true];
+//  user.Level Level = 3 [(buf.validate.field).ignore_empty = true];
+//  user.Nickname Nickname = 4 [(buf.validate.field).ignore_empty = true];
+//}

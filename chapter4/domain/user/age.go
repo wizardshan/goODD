@@ -4,26 +4,31 @@ import "github.com/tidwall/gjson"
 
 type Age struct {
 	Value int64 `binding:"min=1,max=120"`
-	Start int64 `binding:"min=1,max=120"`
-	End   int64 `binding:"min=1,max=120"`
+	Set   bool
+}
+
+func (o *Age) IsPresent(f func(v int64)) {
+	if o.Set {
+		f(o.Value)
+	}
+}
+
+func (o *Age) SetTo(v int64) {
+	o.Set = true
+	o.Value = v
 }
 
 func (o *Age) UnmarshalJSON(data []byte) error {
 	if data[0] != '{' {
 		o.Value = gjson.ParseBytes(data).Int()
+		o.Set = true
 		return nil
 	}
 
-	results := gjson.GetManyBytes(data, "Value", "Start", "End")
-	if results[0].Exists() {
-		o.Value = gjson.ParseBytes(data).Int()
-		return nil
-	}
-	if results[1].Exists() {
-		o.Start = results[1].Int()
-	}
-	if results[2].Exists() {
-		o.End = results[2].Int()
+	result := gjson.GetBytes(data, "Value")
+	if result.Exists() {
+		o.Value = result.Int()
+		o.Set = true
 	}
 	return nil
 }

@@ -5,8 +5,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
-	"goODD/chapter4/controller/response"
-	"goODD/chapter4/domain/vo"
+	"goODD/chapter5/controller/response"
+	"goODD/chapter5/domain/vo"
 	"net/http"
 )
 

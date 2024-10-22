@@ -4,7 +4,7 @@ package ent
 
 import (
 	"fmt"
-	"goODD/chapter10/repository/ent/user"
+	"chapter10/repository/ent/user"
 	"strings"
 	"time"
 

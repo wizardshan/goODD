@@ -1,71 +1,71 @@
 package user
 
 import (
-	"errors"
 	"github.com/tidwall/gjson"
-	"goODD/chapter6/pkg/validator"
 )
 
+const (
+	LevelNormal   = 0
+	LevelSilver   = 10
+	LevelGold     = 20
+	LevelPlatinum = 30
+)
+
+type Levels []Level
+
+func (o Levels) IsPresent(f func(v []int64)) {
+	if len(o) != 0 {
+		f(o.Values())
+	}
+}
+
+func (o Levels) Values() []int64 {
+	values := make([]int64, len(o))
+	for i, level := range o {
+		values[i] = level.Value
+	}
+	return values
+}
+
 type Level struct {
-	Value  int64
-	Values []int64
+	Value int64 `binding:"oneof=0 10 20 30"`
+	Set   bool
 }
 
-func (o Level) validate(v int64) error {
-	return validator.Var(v, "oneof=0 10 20 30")
+func (o *Level) Desc() string {
+	mapping := map[int64]string{
+		LevelNormal:   "普通",
+		LevelSilver:   "白银",
+		LevelGold:     "黄金",
+		LevelPlatinum: "铂金",
+	}
+	desc, ok := mapping[o.Value]
+	if ok {
+		return desc
+	}
+	return "未知"
 }
 
-func (o Level) Validate() error {
-	return o.validate(o.Value)
+func (o *Level) IsPresent(f func(v int64)) {
+	if o.Set {
+		f(o.Value)
+	}
 }
 
-func (o Level) ValidateOmit() error {
-	if o.Value != 0 {
-		return o.validate(o.Value)
-	}
-	return nil
-}
-
-func (o Level) MultiValidate() error {
-	if len(o.Values) == 0 {
-		return errors.New("多值不能为空")
-	}
-	for _, v := range o.Values {
-		if err := o.validate(v); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (o Level) MultiValidateOmit() error {
-	if len(o.Values) == 0 {
-		return nil
-	}
-	for _, v := range o.Values {
-		if err := o.validate(v); err != nil {
-			return err
-		}
-	}
-	return nil
+func (o *Level) SetTo(v int64) {
+	o.Set = true
+	o.Value = v
 }
 
 func (o *Level) UnmarshalJSON(data []byte) error {
 	if data[0] != '{' {
-		o.Value = gjson.ParseBytes(data).Int()
+		o.SetTo(gjson.ParseBytes(data).Int())
 		return nil
 	}
 
-	results := gjson.GetManyBytes(data, "Value", "Values")
-	if results[0].Exists() {
-		o.Value = results[0].Int()
-		return nil
-	}
-	if results[1].Exists() {
-		values := results[1].Array()
-		for _, v := range values {
-			o.Values = append(o.Values, v.Int())
-		}
+	result := gjson.GetBytes(data, "Value")
+	if result.Exists() {
+		o.SetTo(result.Int())
 	}
 	return nil
 }

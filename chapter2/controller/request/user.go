@@ -6,11 +6,11 @@ import (
 )
 
 type UserLogin struct {
-	Mobile vo.Mobile `binding:"required"`
+	Mobile vo.Mobile
 }
 
 type UserOne struct {
-	ID vo.ID `binding:"required"`
+	ID vo.ID
 }
 
 type UserMany struct {

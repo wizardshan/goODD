@@ -5,8 +5,8 @@ package ent
 import (
 	"context"
 	"fmt"
-	"goODD/chapter10/repository/ent/predicate"
-	"goODD/chapter10/repository/ent/user"
+	"chapter10/repository/ent/predicate"
+	"chapter10/repository/ent/user"
 	"math"
 
 	"entgo.io/ent"

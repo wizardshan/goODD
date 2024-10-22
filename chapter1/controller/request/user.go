@@ -11,11 +11,11 @@ type UserLoginV2 struct {
 }
 
 type UserLogin struct {
-	MobileField `binding:"required"`
+	MobileField
 }
 
 type UserOne struct {
-	IDField `binding:"required"`
+	IDField
 }
 
 type UserMany struct {

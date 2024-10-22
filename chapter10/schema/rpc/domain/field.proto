@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package vo;
+
+option go_package = "chapter10/rpc/domain";
+
+import "buf/validate/validate.proto";
+
+message ID {
+  int64 Value = 1 [(buf.validate.field).int64.gte = 1];
+}
+
+message Captcha {
+  string Value = 1 [(buf.validate.field).string.len = 4, (buf.validate.field).string.pattern = "^[0-9]*$"];
+}
+
+message Mobile {
+  string Value = 1 [(buf.validate.field).string.len = 11, (buf.validate.field).string.pattern = "^(1[3-9][0-9]\\d{8})$"];
+}

@@ -1,27 +1,27 @@
 package vo
 
 import (
-	"errors"
+	"chapter10/rpc/domain"
 )
 
 type ID struct {
-	Int64Value
+	domain.ID
+	Set bool
 }
 
-func (o ID) validate(v int64) error {
-	if v < 1 {
-		return errors.New("ID必须大于等于1")
-	}
-	return nil
-}
-
-func (o ID) Validate() error {
-	return o.validate(o.Value)
-}
-
-func (o ID) ValidateOmit() error {
+func (o *ID) IsPresent(f func(v int64)) {
 	if o.Set {
-		return o.validate(o.Value)
+		f(o.Value)
 	}
-	return nil
+}
+
+func (o *ID) SetTo(v int64) {
+	o.Set = true
+	o.Value = v
+}
+
+func (o *ID) SetToPb(v *domain.ID) {
+	if v != nil {
+		o.SetTo(v.Value)
+	}
 }

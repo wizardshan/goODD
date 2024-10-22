@@ -1,33 +1,35 @@
 package user
 
 import (
-	"goODD/chapter10/domain/vo"
-	"goODD/chapter10/pkg/validator"
+	"chapter10/rpc/domain/user"
 )
 
 type Avatar struct {
-	vo.StringValue
+	user.Avatar
+	Set bool
 }
 
 func (o *Avatar) SetToDefault() {
 	o.SetTo(o.Default())
 }
 
-func (o Avatar) Default() string {
+func (o *Avatar) Default() string {
 	return "avatar_default.png"
 }
 
-func (o Avatar) validate(v string) error {
-	return validator.Var(v, "image")
-}
-
-func (o Avatar) Validate() error {
-	return o.validate(o.Value)
-}
-
-func (o Avatar) ValidateOmit() error {
+func (o *Avatar) IsPresent(f func(v string)) {
 	if o.Set {
-		return o.validate(o.Value)
+		f(o.Value)
 	}
-	return nil
+}
+
+func (o *Avatar) SetTo(v string) {
+	o.Set = true
+	o.Value = v
+}
+
+func (o *Avatar) SetToPb(v *user.Avatar) {
+	if v != nil {
+		o.SetTo(v.Value)
+	}
 }

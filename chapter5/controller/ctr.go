@@ -4,12 +4,22 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 	"goODD/chapter5/controller/response"
+	"goODD/chapter5/domain/vo"
 	"net/http"
 )
 
+var validate = binding.Validator.Engine().(*validator.Validate)
+
 func init() {
-	binding.Validator = nil
+	validate.RegisterValidation("mobile", func(fl validator.FieldLevel) bool {
+		mobile := vo.Mobile{Value: fl.Field().String()}
+		if err := mobile.Validate(); err != nil {
+			return false
+		}
+		return true
+	})
 }
 
 type HandlerFunc func(c *gin.Context) (response.Data, error)
@@ -29,21 +39,4 @@ func Wrapper(handlerFunc HandlerFunc) func(c *gin.Context) {
 			c.JSON(http.StatusOK, response.Resp{Code: http.StatusOK, Message: http.StatusText(http.StatusOK), Success: true, Data: data})
 		}
 	}
-}
-
-type Validator interface {
-	Validate() error
-}
-
-type ctr struct {
-}
-
-func (ctr *ctr) Bind(c *gin.Context, obj any) error {
-	if err := c.ShouldBind(obj); err != nil {
-		return err
-	}
-	if validator, ok := obj.(Validator); ok {
-		return validator.Validate()
-	}
-	return nil
 }
