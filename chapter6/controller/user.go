@@ -6,6 +6,7 @@ import (
 	"goODD/chapter6/controller/request"
 	"goODD/chapter6/controller/response"
 	"goODD/chapter6/domain"
+	"goODD/chapter6/domain/vo"
 	"goODD/chapter6/repository"
 	"goODD/chapter6/repository/ent"
 	"goODD/chapter6/repository/ent/user"
@@ -23,14 +24,13 @@ func NewUser(repo *repository.User) *User {
 }
 
 func (ctr *User) FetchOne(c *gin.Context) (response.Data, error) {
-	id, _ := strconv.ParseInt(c.Param("id"), 10, 64)
-	req := new(request.UserOne)
-	req.ID.SetTo(id)
-	if err := c.ShouldBind(req); err != nil {
+	var id vo.ID
+	id.Value, _ = strconv.ParseInt(c.Param("id"), 10, 64)
+	if err := validate.Struct(id); err != nil {
 		return nil, err
 	}
 
-	domUser := ctr.repo.Fetch(c.Request.Context(), id)
+	domUser := ctr.repo.Find(c.Request.Context(), id)
 	if !domUser.Set {
 		return nil, errors.New("404 Not Found")
 	}
@@ -151,12 +151,13 @@ func (ctr *User) Modify(c *gin.Context) (response.Data, error) {
 		return nil, err
 	}
 
-	var cmdUser domain.User
-	cmdUser.ID = req.ID
-	cmdUser.Age = req.Age
-	cmdUser.Nickname = req.Nickname
-	cmdUser.Avatar = req.Avatar
-	cmdUser.Bio = req.Bio
+	cmdUser := domain.User{
+		ID:       req.ID,
+		Age:      req.Age,
+		Nickname: req.Nickname,
+		Avatar:   req.Avatar,
+		Bio:      req.Bio,
+	}
 	ctr.repo.Modify(c.Request.Context(), cmdUser)
 	return nil, nil
 }

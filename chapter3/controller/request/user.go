@@ -6,7 +6,8 @@ import (
 )
 
 type UserLogin struct {
-	Mobile vo.Mobile
+	Mobile  vo.Mobile
+	Captcha vo.Captcha
 }
 
 type UserOne struct {

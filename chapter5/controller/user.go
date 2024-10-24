@@ -6,6 +6,7 @@ import (
 	"goODD/chapter5/controller/request"
 	"goODD/chapter5/controller/response"
 	"goODD/chapter5/domain"
+	"goODD/chapter5/domain/vo"
 	"goODD/chapter5/repository"
 	"goODD/chapter5/repository/ent"
 	"goODD/chapter5/repository/ent/user"
@@ -23,14 +24,13 @@ func NewUser(repo *repository.User) *User {
 }
 
 func (ctr *User) FetchOne(c *gin.Context) (response.Data, error) {
-	id, _ := strconv.ParseInt(c.Param("id"), 10, 64)
-	req := new(request.UserOne)
-	req.ID.SetTo(id)
-	if err := c.ShouldBind(req); err != nil {
+	var id vo.ID
+	id.Value, _ = strconv.ParseInt(c.Param("id"), 10, 64)
+	if err := validate.Struct(id); err != nil {
 		return nil, err
 	}
 
-	domUser := ctr.repo.Fetch(c.Request.Context(), id)
+	domUser := ctr.repo.Find(c.Request.Context(), id)
 	if !domUser.Set {
 		return nil, errors.New("404 Not Found")
 	}
@@ -57,7 +57,7 @@ func (ctr *User) Many(c *gin.Context) (response.Data, error) {
 	if err := c.ShouldBind(req); err != nil {
 		return nil, err
 	}
-	return req, nil
+
 	domUsers := ctr.repo.FetchMany(c.Request.Context(), func(opt *ent.UserQuery) {
 		req.Mobile.IsPresent(func(v string) {
 			opt.Where(user.Mobile(v))

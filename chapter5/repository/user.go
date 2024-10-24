@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"goODD/chapter5/domain"
+	"goODD/chapter5/domain/vo"
 	"goODD/chapter5/repository/ent"
 	"goODD/chapter5/repository/ent/user"
 )
@@ -15,6 +16,12 @@ func NewUser(db *ent.Client) *User {
 	repo := new(User)
 	repo.db = db
 	return repo
+}
+
+func (repo *User) Find(ctx context.Context, id vo.ID) domain.User {
+	return repo.FetchOne(ctx, func(opt *ent.UserQuery) {
+		opt.Where(user.ID(id.Value))
+	})
 }
 
 func (repo *User) FindOne(ctx context.Context, qryUser domain.User) domain.User {
