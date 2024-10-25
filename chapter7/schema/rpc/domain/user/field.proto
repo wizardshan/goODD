@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package user;
+
+option go_package = "chapter7/rpc/domain/user";
+
+import "buf/validate/validate.proto";
+
+message Age {
+  int64 Value = 1 [(buf.validate.field).int64.gte = 1, (buf.validate.field).int64.lte = 120];
+}
+
+message Amount {
+  int64 Value = 1;
+}
+
+message Avatar {
+  string Value = 1 [(buf.validate.field).string.pattern = "^(.*)\\.(jpg|gif|ico|pcx|jpeg|png|webp)$"];
+}
+
+message Bio {
+  string Value = 1 [(buf.validate.field).string.max_len = 200];
+}
+
+message HashID {
+  string Value = 1 [(buf.validate.field).string.pattern = "^[a-zA-Z0-9]*$"];
+}
+
+message Level {
+  int64 Value = 1 [(buf.validate.field).int64 = { in: [0, 10, 20, 30] }];
+}
+
+message Nickname {
+  string Value = 1 [(buf.validate.field).string.min_len = 2, (buf.validate.field).string.max_len = 10];
+}
+
+message Password {
+  string Value = 1 [(buf.validate.field).string.min_len = 6, (buf.validate.field).string.max_len = 20];
+}
+
+
+
+
