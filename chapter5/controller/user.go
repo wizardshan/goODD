@@ -24,8 +24,9 @@ func NewUser(repo *repository.User) *User {
 }
 
 func (ctr *User) FetchOne(c *gin.Context) (response.Data, error) {
+	idValue, _ := strconv.ParseInt(c.Param("id"), 10, 64)
 	var id vo.ID
-	id.Value, _ = strconv.ParseInt(c.Param("id"), 10, 64)
+	id.SetTo(idValue)
 	if err := validate.Struct(id); err != nil {
 		return nil, err
 	}
