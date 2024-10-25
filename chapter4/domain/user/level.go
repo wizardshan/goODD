@@ -7,12 +7,6 @@ type Level struct {
 	Set   bool
 }
 
-func (o *Level) IsPresent(f func(v int64)) {
-	if o.Set {
-		f(o.Value)
-	}
-}
-
 func (o *Level) SetTo(v int64) {
 	o.Set = true
 	o.Value = v
@@ -20,15 +14,13 @@ func (o *Level) SetTo(v int64) {
 
 func (o *Level) UnmarshalJSON(data []byte) error {
 	if data[0] != '{' {
-		o.Value = gjson.ParseBytes(data).Int()
-		o.Set = true
+		o.SetTo(gjson.ParseBytes(data).Int())
 		return nil
 	}
 
 	result := gjson.GetBytes(data, "Value")
 	if result.Exists() {
-		o.Value = result.Int()
-		o.Set = true
+		o.SetTo(result.Int())
 	}
 	return nil
 }

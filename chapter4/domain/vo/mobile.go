@@ -11,12 +11,6 @@ type Mobile struct {
 	Set   bool
 }
 
-func (o *Mobile) IsPresent(f func(v string)) {
-	if o.Set {
-		f(o.Value)
-	}
-}
-
 func (o *Mobile) SetTo(v string) {
 	o.Set = true
 	o.Value = v
@@ -31,15 +25,13 @@ func (o *Mobile) Validate() error {
 
 func (o *Mobile) UnmarshalJSON(data []byte) error {
 	if data[0] != '{' {
-		o.Value = gjson.ParseBytes(data).String()
-		o.Set = true
+		o.SetTo(gjson.ParseBytes(data).String())
 		return nil
 	}
 
 	result := gjson.GetBytes(data, "Value")
 	if result.Exists() {
-		o.Value = result.String()
-		o.Set = true
+		o.SetTo(result.String())
 	}
 	return nil
 }
