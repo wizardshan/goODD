@@ -1,12 +1,12 @@
 package user
 
 import (
-	"chapter7/rpc/domain/user"
+	"goODD/chapter7/domain/vo"
+	"goODD/chapter7/pkg/validate"
 )
 
 type Avatar struct {
-	user.Avatar
-	Set bool
+	vo.StringValue
 }
 
 func (o *Avatar) SetToDefault() {
@@ -17,19 +17,13 @@ func (o *Avatar) Default() string {
 	return "avatar_default.png"
 }
 
-func (o *Avatar) IsPresent(f func(v string)) {
+func (o *Avatar) ValidateOmit() error {
 	if o.Set {
-		f(o.Value)
+		return o.Validate()
 	}
+	return nil
 }
 
-func (o *Avatar) SetTo(v string) {
-	o.Set = true
-	o.Value = v
-}
-
-func (o *Avatar) SetToPb(v *user.Avatar) {
-	if v != nil {
-		o.SetTo(v.Value)
-	}
+func (o *Avatar) Validate() error {
+	return validate.Var(o.Value, "image")
 }

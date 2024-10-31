@@ -1,33 +1,11 @@
 package domain
 
 import (
-	"chapter7/domain/user"
-	"chapter7/domain/vo"
-	"chapter7/rpc/response"
-	"google.golang.org/protobuf/types/known/timestamppb"
+	"goODD/chapter7/controller/response"
+	"goODD/chapter7/domain/user"
+	"goODD/chapter7/domain/vo"
 	"time"
 )
-
-type UserOption func(*User)
-
-func UserPassword(v user.Password) UserOption {
-	return func(u *User) {
-		u.Password = v
-	}
-}
-
-func NewUser(mobile vo.Mobile, options ...UserOption) User {
-	var u User
-	u.Mobile = mobile
-	u.Nickname.SetTo(mobile.GenNickname())
-	u.Avatar.SetToDefault()
-	u.CreateTime = time.Now()
-
-	for _, option := range options {
-		option(&u)
-	}
-	return u
-}
 
 type Users []User
 
@@ -42,33 +20,51 @@ type User struct {
 	Avatar     user.Avatar
 	Bio        user.Bio
 	Amount     user.Amount
+	Status     user.Status
 	CreateTime time.Time
 	UpdateTime time.Time
 
 	Set bool
 }
 
-func (domUser User) Mapper() *response.User {
-	var respUser response.User
-	respUser.ID = &domUser.ID.Value
-	respUser.Mobile = &domUser.Mobile.Value
-	respUser.HashID = &domUser.HashID.Value
-	respUser.Age = &domUser.Age.Value
-	respUser.Level = &domUser.Level.Value
-	desc := domUser.Level.Desc()
-	respUser.LevelDesc = &desc
-	respUser.Nickname = &domUser.Nickname.Value
-	respUser.Avatar = &domUser.Avatar.Value
-	respUser.Bio = &domUser.Bio.Value
-	amount := domUser.Amount.ConvertYuan()
-	respUser.Amount = &amount
-	respUser.CreateTime = timestamppb.New(domUser.CreateTime)
-	return &respUser
+func (domUser *User) SmsRegister(mobile vo.Mobile) {
+	domUser.Mobile = mobile
+	domUser.Nickname.SetTo(mobile.GenNickname())
+	domUser.Avatar.SetToDefault()
+	domUser.CreateTime = time.Now()
 }
 
-func (domUsers Users) Mapper() []*response.User {
+func (domUser *User) Register(mobile vo.Mobile, password user.Password) {
+	domUser.Mobile = mobile
+	domUser.Nickname.SetTo(mobile.GenNickname())
+	domUser.Avatar.SetToDefault()
+	domUser.CreateTime = time.Now()
+	domUser.Password = password
+}
+
+func (domUser User) Mapper() response.User {
+	var respUser response.User
+	if !domUser.Set {
+		return respUser
+	}
+	respUser.ID = domUser.ID.Value
+	respUser.Mobile = domUser.Mobile.Value
+	respUser.HashID = domUser.HashID.Value
+	respUser.Age = domUser.Age.Value
+	respUser.Level = domUser.Level.Value
+	respUser.LevelDesc = domUser.Level.Desc()
+	respUser.Nickname = domUser.Nickname.Value
+	respUser.Avatar = domUser.Avatar.Value
+	respUser.Bio = domUser.Bio.Value
+	respUser.Amount = domUser.Amount.ConvertYuan()
+	respUser.CreateTime = domUser.CreateTime
+
+	return respUser
+}
+
+func (domUsers Users) Mapper() response.Users {
 	size := len(domUsers)
-	respUsers := make([]*response.User, size)
+	respUsers := make(response.Users, size)
 	for i := 0; i < size; i++ {
 		respUsers[i] = domUsers[i].Mapper()
 	}

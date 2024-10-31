@@ -1,25 +1,21 @@
 package user
 
-import "chapter7/rpc/domain/user"
+import (
+	"goODD/chapter7/domain/vo"
+	"goODD/chapter7/pkg/validate"
+)
 
 type Bio struct {
-	user.Bio
-	Set bool
+	vo.StringValue
 }
 
-func (o *Bio) IsPresent(f func(v string)) {
+func (o *Bio) ValidateOmit() error {
 	if o.Set {
-		f(o.Value)
+		return o.Validate()
 	}
+	return nil
 }
 
-func (o *Bio) SetTo(v string) {
-	o.Set = true
-	o.Value = v
-}
-
-func (o *Bio) SetToPb(v *user.Bio) {
-	if v != nil {
-		o.SetTo(v.Value)
-	}
+func (o *Bio) Validate() error {
+	return validate.Var(o.Value, "max=200")
 }

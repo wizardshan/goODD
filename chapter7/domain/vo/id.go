@@ -1,27 +1,20 @@
 package vo
 
 import (
-	"chapter7/rpc/domain"
+	"goODD/chapter5/pkg/validate"
 )
 
 type ID struct {
-	domain.ID
-	Set bool
+	Int64Value
 }
 
-func (o *ID) IsPresent(f func(v int64)) {
+func (o *ID) ValidateOmit() error {
 	if o.Set {
-		f(o.Value)
+		return o.Validate()
 	}
+	return nil
 }
 
-func (o *ID) SetTo(v int64) {
-	o.Set = true
-	o.Value = v
-}
-
-func (o *ID) SetToPb(v *domain.ID) {
-	if v != nil {
-		o.SetTo(v.Value)
-	}
+func (o *ID) Validate() error {
+	return validate.Var(o.Value, "min=1")
 }

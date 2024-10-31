@@ -28,20 +28,6 @@ func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	return uu
 }
 
-// SetHashID sets the "hash_id" field.
-func (uu *UserUpdate) SetHashID(s string) *UserUpdate {
-	uu.mutation.SetHashID(s)
-	return uu
-}
-
-// SetNillableHashID sets the "hash_id" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableHashID(s *string) *UserUpdate {
-	if s != nil {
-		uu.SetHashID(*s)
-	}
-	return uu
-}
-
 // SetMobile sets the "mobile" field.
 func (uu *UserUpdate) SetMobile(s string) *UserUpdate {
 	uu.mutation.SetMobile(s)
@@ -52,20 +38,6 @@ func (uu *UserUpdate) SetMobile(s string) *UserUpdate {
 func (uu *UserUpdate) SetNillableMobile(s *string) *UserUpdate {
 	if s != nil {
 		uu.SetMobile(*s)
-	}
-	return uu
-}
-
-// SetPassword sets the "password" field.
-func (uu *UserUpdate) SetPassword(s string) *UserUpdate {
-	uu.mutation.SetPassword(s)
-	return uu
-}
-
-// SetNillablePassword sets the "password" field if the given value is not nil.
-func (uu *UserUpdate) SetNillablePassword(s *string) *UserUpdate {
-	if s != nil {
-		uu.SetPassword(*s)
 	}
 	return uu
 }
@@ -126,55 +98,6 @@ func (uu *UserUpdate) SetNillableNickname(s *string) *UserUpdate {
 	return uu
 }
 
-// SetAvatar sets the "avatar" field.
-func (uu *UserUpdate) SetAvatar(s string) *UserUpdate {
-	uu.mutation.SetAvatar(s)
-	return uu
-}
-
-// SetNillableAvatar sets the "avatar" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableAvatar(s *string) *UserUpdate {
-	if s != nil {
-		uu.SetAvatar(*s)
-	}
-	return uu
-}
-
-// SetBio sets the "bio" field.
-func (uu *UserUpdate) SetBio(s string) *UserUpdate {
-	uu.mutation.SetBio(s)
-	return uu
-}
-
-// SetNillableBio sets the "bio" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableBio(s *string) *UserUpdate {
-	if s != nil {
-		uu.SetBio(*s)
-	}
-	return uu
-}
-
-// SetAmount sets the "amount" field.
-func (uu *UserUpdate) SetAmount(i int64) *UserUpdate {
-	uu.mutation.ResetAmount()
-	uu.mutation.SetAmount(i)
-	return uu
-}
-
-// SetNillableAmount sets the "amount" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableAmount(i *int64) *UserUpdate {
-	if i != nil {
-		uu.SetAmount(*i)
-	}
-	return uu
-}
-
-// AddAmount adds i to the "amount" field.
-func (uu *UserUpdate) AddAmount(i int64) *UserUpdate {
-	uu.mutation.AddAmount(i)
-	return uu
-}
-
 // SetCreateTime sets the "create_time" field.
 func (uu *UserUpdate) SetCreateTime(t time.Time) *UserUpdate {
 	uu.mutation.SetCreateTime(t)
@@ -189,12 +112,6 @@ func (uu *UserUpdate) SetNillableCreateTime(t *time.Time) *UserUpdate {
 	return uu
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (uu *UserUpdate) SetUpdateTime(t time.Time) *UserUpdate {
-	uu.mutation.SetUpdateTime(t)
-	return uu
-}
-
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
@@ -202,7 +119,6 @@ func (uu *UserUpdate) Mutation() *UserMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
-	uu.defaults()
 	return withHooks(ctx, uu.sqlSave, uu.mutation, uu.hooks)
 }
 
@@ -228,14 +144,6 @@ func (uu *UserUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (uu *UserUpdate) defaults() {
-	if _, ok := uu.mutation.UpdateTime(); !ok {
-		v := user.UpdateDefaultUpdateTime()
-		uu.mutation.SetUpdateTime(v)
-	}
-}
-
 func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt64))
 	if ps := uu.mutation.predicates; len(ps) > 0 {
@@ -245,14 +153,8 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := uu.mutation.HashID(); ok {
-		_spec.SetField(user.FieldHashID, field.TypeString, value)
-	}
 	if value, ok := uu.mutation.Mobile(); ok {
 		_spec.SetField(user.FieldMobile, field.TypeString, value)
-	}
-	if value, ok := uu.mutation.Password(); ok {
-		_spec.SetField(user.FieldPassword, field.TypeString, value)
 	}
 	if value, ok := uu.mutation.Age(); ok {
 		_spec.SetField(user.FieldAge, field.TypeInt64, value)
@@ -269,23 +171,8 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := uu.mutation.Nickname(); ok {
 		_spec.SetField(user.FieldNickname, field.TypeString, value)
 	}
-	if value, ok := uu.mutation.Avatar(); ok {
-		_spec.SetField(user.FieldAvatar, field.TypeString, value)
-	}
-	if value, ok := uu.mutation.Bio(); ok {
-		_spec.SetField(user.FieldBio, field.TypeString, value)
-	}
-	if value, ok := uu.mutation.Amount(); ok {
-		_spec.SetField(user.FieldAmount, field.TypeInt64, value)
-	}
-	if value, ok := uu.mutation.AddedAmount(); ok {
-		_spec.AddField(user.FieldAmount, field.TypeInt64, value)
-	}
 	if value, ok := uu.mutation.CreateTime(); ok {
 		_spec.SetField(user.FieldCreateTime, field.TypeTime, value)
-	}
-	if value, ok := uu.mutation.UpdateTime(); ok {
-		_spec.SetField(user.FieldUpdateTime, field.TypeTime, value)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -307,20 +194,6 @@ type UserUpdateOne struct {
 	mutation *UserMutation
 }
 
-// SetHashID sets the "hash_id" field.
-func (uuo *UserUpdateOne) SetHashID(s string) *UserUpdateOne {
-	uuo.mutation.SetHashID(s)
-	return uuo
-}
-
-// SetNillableHashID sets the "hash_id" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableHashID(s *string) *UserUpdateOne {
-	if s != nil {
-		uuo.SetHashID(*s)
-	}
-	return uuo
-}
-
 // SetMobile sets the "mobile" field.
 func (uuo *UserUpdateOne) SetMobile(s string) *UserUpdateOne {
 	uuo.mutation.SetMobile(s)
@@ -331,20 +204,6 @@ func (uuo *UserUpdateOne) SetMobile(s string) *UserUpdateOne {
 func (uuo *UserUpdateOne) SetNillableMobile(s *string) *UserUpdateOne {
 	if s != nil {
 		uuo.SetMobile(*s)
-	}
-	return uuo
-}
-
-// SetPassword sets the "password" field.
-func (uuo *UserUpdateOne) SetPassword(s string) *UserUpdateOne {
-	uuo.mutation.SetPassword(s)
-	return uuo
-}
-
-// SetNillablePassword sets the "password" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillablePassword(s *string) *UserUpdateOne {
-	if s != nil {
-		uuo.SetPassword(*s)
 	}
 	return uuo
 }
@@ -405,55 +264,6 @@ func (uuo *UserUpdateOne) SetNillableNickname(s *string) *UserUpdateOne {
 	return uuo
 }
 
-// SetAvatar sets the "avatar" field.
-func (uuo *UserUpdateOne) SetAvatar(s string) *UserUpdateOne {
-	uuo.mutation.SetAvatar(s)
-	return uuo
-}
-
-// SetNillableAvatar sets the "avatar" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableAvatar(s *string) *UserUpdateOne {
-	if s != nil {
-		uuo.SetAvatar(*s)
-	}
-	return uuo
-}
-
-// SetBio sets the "bio" field.
-func (uuo *UserUpdateOne) SetBio(s string) *UserUpdateOne {
-	uuo.mutation.SetBio(s)
-	return uuo
-}
-
-// SetNillableBio sets the "bio" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableBio(s *string) *UserUpdateOne {
-	if s != nil {
-		uuo.SetBio(*s)
-	}
-	return uuo
-}
-
-// SetAmount sets the "amount" field.
-func (uuo *UserUpdateOne) SetAmount(i int64) *UserUpdateOne {
-	uuo.mutation.ResetAmount()
-	uuo.mutation.SetAmount(i)
-	return uuo
-}
-
-// SetNillableAmount sets the "amount" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableAmount(i *int64) *UserUpdateOne {
-	if i != nil {
-		uuo.SetAmount(*i)
-	}
-	return uuo
-}
-
-// AddAmount adds i to the "amount" field.
-func (uuo *UserUpdateOne) AddAmount(i int64) *UserUpdateOne {
-	uuo.mutation.AddAmount(i)
-	return uuo
-}
-
 // SetCreateTime sets the "create_time" field.
 func (uuo *UserUpdateOne) SetCreateTime(t time.Time) *UserUpdateOne {
 	uuo.mutation.SetCreateTime(t)
@@ -465,12 +275,6 @@ func (uuo *UserUpdateOne) SetNillableCreateTime(t *time.Time) *UserUpdateOne {
 	if t != nil {
 		uuo.SetCreateTime(*t)
 	}
-	return uuo
-}
-
-// SetUpdateTime sets the "update_time" field.
-func (uuo *UserUpdateOne) SetUpdateTime(t time.Time) *UserUpdateOne {
-	uuo.mutation.SetUpdateTime(t)
 	return uuo
 }
 
@@ -494,7 +298,6 @@ func (uuo *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne 
 
 // Save executes the query and returns the updated User entity.
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
-	uuo.defaults()
 	return withHooks(ctx, uuo.sqlSave, uuo.mutation, uuo.hooks)
 }
 
@@ -517,14 +320,6 @@ func (uuo *UserUpdateOne) Exec(ctx context.Context) error {
 func (uuo *UserUpdateOne) ExecX(ctx context.Context) {
 	if err := uuo.Exec(ctx); err != nil {
 		panic(err)
-	}
-}
-
-// defaults sets the default values of the builder before save.
-func (uuo *UserUpdateOne) defaults() {
-	if _, ok := uuo.mutation.UpdateTime(); !ok {
-		v := user.UpdateDefaultUpdateTime()
-		uuo.mutation.SetUpdateTime(v)
 	}
 }
 
@@ -554,14 +349,8 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			}
 		}
 	}
-	if value, ok := uuo.mutation.HashID(); ok {
-		_spec.SetField(user.FieldHashID, field.TypeString, value)
-	}
 	if value, ok := uuo.mutation.Mobile(); ok {
 		_spec.SetField(user.FieldMobile, field.TypeString, value)
-	}
-	if value, ok := uuo.mutation.Password(); ok {
-		_spec.SetField(user.FieldPassword, field.TypeString, value)
 	}
 	if value, ok := uuo.mutation.Age(); ok {
 		_spec.SetField(user.FieldAge, field.TypeInt64, value)
@@ -578,23 +367,8 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	if value, ok := uuo.mutation.Nickname(); ok {
 		_spec.SetField(user.FieldNickname, field.TypeString, value)
 	}
-	if value, ok := uuo.mutation.Avatar(); ok {
-		_spec.SetField(user.FieldAvatar, field.TypeString, value)
-	}
-	if value, ok := uuo.mutation.Bio(); ok {
-		_spec.SetField(user.FieldBio, field.TypeString, value)
-	}
-	if value, ok := uuo.mutation.Amount(); ok {
-		_spec.SetField(user.FieldAmount, field.TypeInt64, value)
-	}
-	if value, ok := uuo.mutation.AddedAmount(); ok {
-		_spec.AddField(user.FieldAmount, field.TypeInt64, value)
-	}
 	if value, ok := uuo.mutation.CreateTime(); ok {
 		_spec.SetField(user.FieldCreateTime, field.TypeTime, value)
-	}
-	if value, ok := uuo.mutation.UpdateTime(); ok {
-		_spec.SetField(user.FieldUpdateTime, field.TypeTime, value)
 	}
 	_node = &User{config: uuo.config}
 	_spec.Assign = _node.assignValues

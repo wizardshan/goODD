@@ -1,27 +1,19 @@
 package vo
 
-import (
-	"chapter7/rpc/domain"
-)
+import "goODD/chapter7/pkg/validate"
 
 type Captcha struct {
-	domain.Captcha
-	Set bool
+	Value string `binding:"number,len=4"`
+	Set   bool
 }
 
-func (o *Captcha) IsPresent(f func(v string)) {
+func (o *Captcha) ValidateOmit() error {
 	if o.Set {
-		f(o.Value)
+		return o.Validate()
 	}
+	return nil
 }
 
-func (o *Captcha) SetTo(v string) {
-	o.Set = true
-	o.Value = v
-}
-
-func (o *Captcha) SetToPb(v *domain.Captcha) {
-	if v != nil {
-		o.SetTo(v.Value)
-	}
+func (o *Captcha) Validate() error {
+	return validate.Var(o.Value, "number,len=4")
 }

@@ -1,34 +1,21 @@
 package user
 
 import (
-	"github.com/tidwall/gjson"
+	"goODD/chapter5/domain/vo"
+	"goODD/chapter5/pkg/validate"
 )
 
 type Age struct {
-	Value int64 `binding:"min=1,max=120"`
-	Set   bool
+	vo.Int64Value
 }
 
-func (o *Age) IsPresent(f func(v int64)) {
+func (o *Age) ValidateOmit() error {
 	if o.Set {
-		f(o.Value)
-	}
-}
-
-func (o *Age) SetTo(v int64) {
-	o.Set = true
-	o.Value = v
-}
-
-func (o *Age) UnmarshalJSON(data []byte) error {
-	if data[0] != '{' {
-		o.SetTo(gjson.ParseBytes(data).Int())
-		return nil
-	}
-
-	result := gjson.GetBytes(data, "Value")
-	if result.Exists() {
-		o.SetTo(result.Int())
+		return o.Validate()
 	}
 	return nil
+}
+
+func (o *Age) Validate() error {
+	return validate.Var(o.Value, "min=1,max=120")
 }

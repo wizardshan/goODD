@@ -5,7 +5,7 @@ package hook
 import (
 	"context"
 	"fmt"
-	"chapter7/repository/ent"
+	"goODD/chapter7/repository/ent"
 )
 
 // The UserFunc type is an adapter to allow the use of ordinary

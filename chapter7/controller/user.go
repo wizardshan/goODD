@@ -1,23 +1,21 @@
 package controller
 
 import (
-	"chapter7/domain"
-	"chapter7/domain/user"
-	"chapter7/domain/vo"
-	"chapter7/repository"
-	"chapter7/repository/ent"
-	entUser "chapter7/repository/ent/user"
-	"chapter7/rpc/request"
-	"chapter7/rpc/response"
-	"chapter7/rpc/rpcconnect"
-	"connectrpc.com/connect"
-	"context"
 	"errors"
+	"github.com/gin-gonic/gin"
+	"goODD/chapter7/controller/request"
+	"goODD/chapter7/controller/response"
+	"goODD/chapter7/domain"
+	"goODD/chapter7/domain/vo"
+	"goODD/chapter7/repository"
+	"goODD/chapter7/repository/ent"
+	"goODD/chapter7/repository/ent/user"
+	"strconv"
 )
 
 type User struct {
+	ctr
 	repo *repository.User
-	rpcconnect.UnimplementedUserHandler
 }
 
 func NewUser(repo *repository.User) *User {
@@ -26,145 +24,169 @@ func NewUser(repo *repository.User) *User {
 	return ctr
 }
 
-func (ctr *User) One(ctx context.Context, req *connect.Request[request.UserOne]) (*connect.Response[response.UserOne], error) {
-	domUser := ctr.repo.Fetch(ctx, req.Msg.ID.GetValue())
+func (ctr *User) FetchOne(c *gin.Context) (response.Data, error) {
+	idValue, _ := strconv.ParseInt(c.Param("id"), 10, 64)
+	var id vo.ID
+	id.SetTo(idValue)
+	if err := id.Validate(); err != nil {
+		return nil, err
+	}
+
+	domUser := ctr.repo.Find(c.Request.Context(), id)
 	if !domUser.Set {
 		return nil, errors.New("404 Not Found")
 	}
-
-	return connect.NewResponse(&response.UserOne{User: domUser.Mapper()}), nil
+	return domUser.Mapper(), nil
 }
 
-func (ctr *User) Many(ctx context.Context, req *connect.Request[request.UserMany]) (*connect.Response[response.UserMany], error) {
-	var qryMobile vo.Mobile
-	qryMobile.SetToPb(req.Msg.Mobile)
-	var qryStartAge user.Age
-	qryStartAge.SetToPb(req.Msg.StartAge)
-	var qryEndAge user.Age
-	qryEndAge.SetToPb(req.Msg.EndAge)
-	var qryLevels user.Levels = req.Msg.Levels
-	var qryNickname user.Nickname
-	qryNickname.SetToPb(req.Msg.Nickname)
+func (ctr *User) One(c *gin.Context) (response.Data, error) {
+	req := new(request.UserOne)
+	if err := ctr.Bind(c, req); err != nil {
+		return nil, err
+	}
+	var qryUser domain.User
+	qryUser.ID = req.ID
 
-	domUsers := ctr.repo.FetchMany(ctx, func(opt *ent.UserQuery) {
-		qryMobile.IsPresent(func(v string) {
-			opt.Where(entUser.Mobile(v))
+	domUser := ctr.repo.FindOne(c.Request.Context(), qryUser)
+	if !domUser.Set {
+		return nil, errors.New("404 Not Found")
+	}
+	return domUser.Mapper(), nil
+}
+
+func (ctr *User) Many(c *gin.Context) (response.Data, error) {
+	req := new(request.UserMany)
+	if err := ctr.Bind(c, req); err != nil {
+		return nil, err
+	}
+
+	domUsers := ctr.repo.FetchMany(c.Request.Context(), func(opt *ent.UserQuery) {
+		req.Mobile.IsPresent(func(v string) {
+			opt.Where(user.Mobile(v))
 		})
-		qryStartAge.IsPresent(func(v int64) {
-			opt.Where(entUser.AgeGTE(v))
+		req.StartAge.IsPresent(func(v int64) {
+			opt.Where(user.AgeGTE(v))
 		})
-		qryEndAge.IsPresent(func(v int64) {
-			opt.Where(entUser.AgeLTE(v))
+		req.EndAge.IsPresent(func(v int64) {
+			opt.Where(user.AgeLTE(v))
 		})
-		qryLevels.IsPresent(func(v []int64) {
-			opt.Where(entUser.LevelIn(v...))
+		req.Levels.IsPresent(func(v []int64) {
+			opt.Where(user.LevelIn(v...))
 		})
-		qryNickname.IsPresent(func(v string) {
-			opt.Where(entUser.NicknameContains(v))
+		req.Nickname.IsPresent(func(v string) {
+			opt.Where(user.NicknameContains(v))
 		})
 	})
-
-	return connect.NewResponse(&response.UserMany{List: domUsers.Mapper()}), nil
+	return domUsers.Mapper(), nil
 }
 
-func (ctr *User) Login(ctx context.Context, req *connect.Request[request.UserLogin]) (*connect.Response[response.UserLogin], error) {
+func (ctr *User) Login(c *gin.Context) (response.Data, error) {
+	req := new(request.UserLogin)
+	if err := ctr.Bind(c, req); err != nil {
+		return nil, err
+	}
 
-	var qryMobile vo.Mobile
-	qryMobile.SetToPb(req.Msg.Mobile)
-
-	mobileNotExist := ctr.repo.NotExist(ctx, func(opt *ent.UserQuery) {
-		opt.Where(entUser.Mobile(qryMobile.Value))
+	mobileNotExist := ctr.repo.NotExist(c.Request.Context(), func(opt *ent.UserQuery) {
+		opt.Where(user.Mobile(req.Mobile.Value))
 	})
 	if mobileNotExist {
 		return nil, errors.New("手机号未注册")
 	}
 
-	domUser := ctr.repo.FetchOne(ctx, func(opt *ent.UserQuery) {
-		opt.Where(entUser.Mobile(qryMobile.Value))
+	domUser := ctr.repo.FetchOne(c.Request.Context(), func(opt *ent.UserQuery) {
+		opt.Where(user.Mobile(req.Mobile.Value))
 	})
 
-	if !domUser.Password.Verify(req.Msg.Password.GetValue()) {
+	if !domUser.Password.Verify(req.Password.Value) {
 		return nil, errors.New("密码错误")
 	}
 
-	return connect.NewResponse(&response.UserLogin{User: domUser.Mapper()}), nil
+	return domUser.Mapper(), nil
 }
 
-func (ctr *User) SmsRegister(ctx context.Context, req *connect.Request[request.UserSmsRegister]) (*connect.Response[response.UserSmsRegister], error) {
-	var qryMobile vo.Mobile
-	qryMobile.SetToPb(req.Msg.Mobile)
-	mobileExist := ctr.repo.Exist(ctx, func(opt *ent.UserQuery) {
-		opt.Where(entUser.Mobile(qryMobile.Value))
+func (ctr *User) SmsRegister(c *gin.Context) (response.Data, error) {
+	req := new(request.UserSmsRegister)
+	if err := ctr.Bind(c, req); err != nil {
+		return nil, err
+	}
+
+	mobileExist := ctr.repo.Exist(c.Request.Context(), func(opt *ent.UserQuery) {
+		opt.Where(user.Mobile(req.Mobile.Value))
 	})
 	if mobileExist {
 		return nil, errors.New("手机号已注册")
 	}
 
-	cmdUser := domain.NewUser(
-		qryMobile,
-	)
-
-	domUser, err := ctr.repo.Register(ctx, cmdUser)
-	if err != nil {
-		return nil, err
-	}
-
-	return connect.NewResponse(&response.UserSmsRegister{User: domUser.Mapper()}), nil
-}
-
-func (ctr *User) Register(ctx context.Context, req *connect.Request[request.UserRegister]) (*connect.Response[response.UserRegister], error) {
-	var qryMobile vo.Mobile
-	qryMobile.SetToPb(req.Msg.Mobile)
-	var qryPassword user.Password
-	qryPassword.SetToPb(req.Msg.Password)
-
-	mobileExist := ctr.repo.Exist(ctx, func(opt *ent.UserQuery) {
-		opt.Where(entUser.Mobile(qryMobile.Value))
-	})
-	if mobileExist {
-		return nil, errors.New("手机号已注册")
-	}
-
-	cmdUser := domain.NewUser(
-		qryMobile,
-		domain.UserPassword(qryPassword),
-	)
-
-	domUser, err := ctr.repo.Register(ctx, cmdUser)
-	if err != nil {
-		return nil, err
-	}
-
-	return connect.NewResponse(&response.UserRegister{User: domUser.Mapper()}), nil
-}
-
-func (ctr *User) Modify(ctx context.Context, req *connect.Request[request.UserModify]) (*connect.Response[response.UserModify], error) {
 	var cmdUser domain.User
-	cmdUser.ID.SetToPb(req.Msg.ID)
-	cmdUser.Age.SetToPb(req.Msg.Age)
-	cmdUser.Nickname.SetToPb(req.Msg.Nickname)
-	cmdUser.Avatar.SetToPb(req.Msg.Avatar)
-	cmdUser.Bio.SetToPb(req.Msg.Bio)
-	ctr.repo.Modify(ctx, cmdUser)
-
-	return connect.NewResponse(&response.UserModify{}), nil
+	cmdUser.SmsRegister(req.Mobile)
+	domUser, err := ctr.repo.Register(c.Request.Context(), cmdUser)
+	return domUser.Mapper(), err
 }
 
-func (ctr *User) Cash(ctx context.Context, req *connect.Request[request.UserCash]) (*connect.Response[response.UserCash], error) {
-	var qryAmount user.Amount
-	qryAmount.SetToPb(req.Msg.Amount)
-	if err := qryAmount.CashLimit(); err != nil {
+func (ctr *User) Register(c *gin.Context) (response.Data, error) {
+	req := new(request.UserRegister)
+	if err := ctr.Bind(c, req); err != nil {
+		return nil, err
+	}
+
+	mobileExist := ctr.repo.Exist(c.Request.Context(), func(opt *ent.UserQuery) {
+		opt.Where(user.Mobile(req.Mobile.Value))
+	})
+	if mobileExist {
+		return nil, errors.New("手机号已注册")
+	}
+
+	var cmdUser domain.User
+	cmdUser.Register(req.Mobile, req.Password)
+
+	domUser, err := ctr.repo.Register(c.Request.Context(), cmdUser)
+	return domUser.Mapper(), err
+}
+
+func (ctr *User) Modify(c *gin.Context) (response.Data, error) {
+	req := new(request.UserModify)
+	if err := ctr.Bind(c, req); err != nil {
+		return nil, err
+	}
+	cmdUser := domain.User{
+		ID:       req.ID,
+		Age:      req.Age,
+		Nickname: req.Nickname,
+		Avatar:   req.Avatar,
+		Bio:      req.Bio,
+	}
+	ctr.repo.Modify(c.Request.Context(), cmdUser)
+	return nil, nil
+}
+
+func (ctr *User) Cash(c *gin.Context) (response.Data, error) {
+	req := new(request.UserCash)
+	if err := ctr.Bind(c, req); err != nil {
 		return nil, err
 	}
 
 	var userID int64 = 1
-	domUser := ctr.repo.Fetch(ctx, userID)
-	if domUser.Amount.Insufficient(qryAmount.Value) {
+	domUser := ctr.repo.Fetch(c.Request.Context(), userID)
+	if domUser.Amount.Insufficient(req.Amount.Value) {
 		return nil, errors.New("余额不足")
 	}
 
-	ctr.repo.Update(ctx, func(opt *ent.UserUpdate) {
-		opt.AddAmount(-qryAmount.Value).Where(entUser.ID(userID))
+	ctr.repo.Update(c.Request.Context(), func(opt *ent.UserUpdate) {
+		opt.AddAmount(-req.Amount.Value).Where(user.ID(userID))
 	})
-	return connect.NewResponse(&response.UserCash{}), nil
+	return nil, nil
+}
+
+func (ctr *User) ChangePassword(c *gin.Context) (response.Data, error) {
+	req := new(request.UserChangePassword)
+	if err := ctr.Bind(c, req); err != nil {
+		return nil, err
+	}
+	cmdUser := domain.User{
+		Password: req.Password,
+	}
+	var userID int64 = 1
+	cmdUser.ID.SetTo(userID)
+	ctr.repo.Modify(c.Request.Context(), cmdUser)
+	return nil, nil
 }

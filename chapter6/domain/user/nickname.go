@@ -1,34 +1,21 @@
 package user
 
 import (
-	"github.com/tidwall/gjson"
+	"goODD/chapter5/domain/vo"
+	"goODD/chapter5/pkg/validate"
 )
 
 type Nickname struct {
-	Value string `binding:"min=2,max=10"`
-	Set   bool
+	vo.StringValue
 }
 
-func (o *Nickname) IsPresent(f func(v string)) {
+func (o *Nickname) ValidateOmit() error {
 	if o.Set {
-		f(o.Value)
-	}
-}
-
-func (o *Nickname) SetTo(v string) {
-	o.Set = true
-	o.Value = v
-}
-
-func (o *Nickname) UnmarshalJSON(data []byte) error {
-	if data[0] != '{' {
-		o.SetTo(gjson.ParseBytes(data).String())
-		return nil
-	}
-
-	result := gjson.GetBytes(data, "Value")
-	if result.Exists() {
-		o.SetTo(result.String())
+		return o.Validate()
 	}
 	return nil
+}
+
+func (o *Nickname) Validate() error {
+	return validate.Var(o.Value, "min=2,max=10")
 }

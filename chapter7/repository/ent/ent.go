@@ -6,7 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"chapter7/repository/ent/user"
+	"goODD/chapter7/repository/ent/user"
 	"reflect"
 	"sync"
 

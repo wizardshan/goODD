@@ -3,8 +3,8 @@
 package ent
 
 import (
-	"chapter7/repository/ent/schema"
-	"chapter7/repository/ent/user"
+	"goODD/chapter7/repository/ent/schema"
+	"goODD/chapter7/repository/ent/user"
 	"time"
 )
 
@@ -50,12 +50,16 @@ func init() {
 	userDescAmount := userFields[9].Descriptor()
 	// user.DefaultAmount holds the default value on creation for the amount field.
 	user.DefaultAmount = userDescAmount.Default.(int64)
+	// userDescStatus is the schema descriptor for status field.
+	userDescStatus := userFields[10].Descriptor()
+	// user.DefaultStatus holds the default value on creation for the status field.
+	user.DefaultStatus = userDescStatus.Default.(int64)
 	// userDescCreateTime is the schema descriptor for create_time field.
-	userDescCreateTime := userFields[10].Descriptor()
+	userDescCreateTime := userFields[11].Descriptor()
 	// user.DefaultCreateTime holds the default value on creation for the create_time field.
 	user.DefaultCreateTime = userDescCreateTime.Default.(func() time.Time)
 	// userDescUpdateTime is the schema descriptor for update_time field.
-	userDescUpdateTime := userFields[11].Descriptor()
+	userDescUpdateTime := userFields[12].Descriptor()
 	// user.DefaultUpdateTime holds the default value on creation for the update_time field.
 	user.DefaultUpdateTime = userDescUpdateTime.Default.(func() time.Time)
 	// user.UpdateDefaultUpdateTime holds the default value on update for the update_time field.

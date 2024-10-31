@@ -6,7 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"chapter7/repository/ent/user"
+	"goODD/chapter7/repository/ent/user"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -146,6 +146,20 @@ func (uc *UserCreate) SetNillableAmount(i *int64) *UserCreate {
 	return uc
 }
 
+// SetStatus sets the "status" field.
+func (uc *UserCreate) SetStatus(i int64) *UserCreate {
+	uc.mutation.SetStatus(i)
+	return uc
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (uc *UserCreate) SetNillableStatus(i *int64) *UserCreate {
+	if i != nil {
+		uc.SetStatus(*i)
+	}
+	return uc
+}
+
 // SetCreateTime sets the "create_time" field.
 func (uc *UserCreate) SetCreateTime(t time.Time) *UserCreate {
 	uc.mutation.SetCreateTime(t)
@@ -251,6 +265,10 @@ func (uc *UserCreate) defaults() {
 		v := user.DefaultAmount
 		uc.mutation.SetAmount(v)
 	}
+	if _, ok := uc.mutation.Status(); !ok {
+		v := user.DefaultStatus
+		uc.mutation.SetStatus(v)
+	}
 	if _, ok := uc.mutation.CreateTime(); !ok {
 		v := user.DefaultCreateTime()
 		uc.mutation.SetCreateTime(v)
@@ -289,6 +307,9 @@ func (uc *UserCreate) check() error {
 	}
 	if _, ok := uc.mutation.Amount(); !ok {
 		return &ValidationError{Name: "amount", err: errors.New(`ent: missing required field "User.amount"`)}
+	}
+	if _, ok := uc.mutation.Status(); !ok {
+		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "User.status"`)}
 	}
 	if _, ok := uc.mutation.CreateTime(); !ok {
 		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "User.create_time"`)}
@@ -363,6 +384,10 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := uc.mutation.Amount(); ok {
 		_spec.SetField(user.FieldAmount, field.TypeInt64, value)
 		_node.Amount = value
+	}
+	if value, ok := uc.mutation.Status(); ok {
+		_spec.SetField(user.FieldStatus, field.TypeInt64, value)
+		_node.Status = value
 	}
 	if value, ok := uc.mutation.CreateTime(); ok {
 		_spec.SetField(user.FieldCreateTime, field.TypeTime, value)

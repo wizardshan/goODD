@@ -9,9 +9,9 @@ import (
 	"log"
 	"reflect"
 
-	"chapter7/repository/ent/migrate"
+	"goODD/chapter7/repository/ent/migrate"
 
-	"chapter7/repository/ent/user"
+	"goODD/chapter7/repository/ent/user"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"

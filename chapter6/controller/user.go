@@ -14,6 +14,7 @@ import (
 )
 
 type User struct {
+	ctr
 	repo *repository.User
 }
 
@@ -27,7 +28,7 @@ func (ctr *User) FetchOne(c *gin.Context) (response.Data, error) {
 	idValue, _ := strconv.ParseInt(c.Param("id"), 10, 64)
 	var id vo.ID
 	id.SetTo(idValue)
-	if err := validate.Struct(id); err != nil {
+	if err := id.Validate(); err != nil {
 		return nil, err
 	}
 
@@ -40,7 +41,7 @@ func (ctr *User) FetchOne(c *gin.Context) (response.Data, error) {
 
 func (ctr *User) One(c *gin.Context) (response.Data, error) {
 	req := new(request.UserOne)
-	if err := c.ShouldBind(req); err != nil {
+	if err := ctr.Bind(c, req); err != nil {
 		return nil, err
 	}
 	var qryUser domain.User
@@ -55,7 +56,7 @@ func (ctr *User) One(c *gin.Context) (response.Data, error) {
 
 func (ctr *User) Many(c *gin.Context) (response.Data, error) {
 	req := new(request.UserMany)
-	if err := c.ShouldBind(req); err != nil {
+	if err := ctr.Bind(c, req); err != nil {
 		return nil, err
 	}
 
@@ -77,110 +78,4 @@ func (ctr *User) Many(c *gin.Context) (response.Data, error) {
 		})
 	})
 	return domUsers.Mapper(), nil
-}
-
-func (ctr *User) Login(c *gin.Context) (response.Data, error) {
-	req := new(request.UserLogin)
-	if err := c.ShouldBind(req); err != nil {
-		return nil, err
-	}
-
-	mobileNotExist := ctr.repo.NotExist(c.Request.Context(), func(opt *ent.UserQuery) {
-		opt.Where(user.Mobile(req.Mobile.Value))
-	})
-	if mobileNotExist {
-		return nil, errors.New("手机号未注册")
-	}
-
-	domUser := ctr.repo.FetchOne(c.Request.Context(), func(opt *ent.UserQuery) {
-		opt.Where(user.Mobile(req.Mobile.Value))
-	})
-
-	if !domUser.Password.Verify(req.Password.Value) {
-		return nil, errors.New("密码错误")
-	}
-
-	return domUser.Mapper(), nil
-}
-
-func (ctr *User) SmsRegister(c *gin.Context) (response.Data, error) {
-	req := new(request.UserSmsRegister)
-	if err := c.ShouldBind(req); err != nil {
-		return nil, err
-	}
-
-	mobileExist := ctr.repo.Exist(c.Request.Context(), func(opt *ent.UserQuery) {
-		opt.Where(user.Mobile(req.Mobile.Value))
-	})
-	if mobileExist {
-		return nil, errors.New("手机号已注册")
-	}
-
-	cmdUser := domain.NewUser(
-		req.Mobile,
-	)
-
-	domUser, err := ctr.repo.Register(c.Request.Context(), cmdUser)
-	return domUser.Mapper(), err
-}
-
-func (ctr *User) Register(c *gin.Context) (response.Data, error) {
-	req := new(request.UserRegister)
-	if err := c.ShouldBind(req); err != nil {
-		return nil, err
-	}
-
-	mobileExist := ctr.repo.Exist(c.Request.Context(), func(opt *ent.UserQuery) {
-		opt.Where(user.Mobile(req.Mobile.Value))
-	})
-	if mobileExist {
-		return nil, errors.New("手机号已注册")
-	}
-
-	cmdUser := domain.NewUser(
-		req.Mobile,
-		domain.UserPassword(req.Password),
-	)
-
-	domUser, err := ctr.repo.Register(c.Request.Context(), cmdUser)
-	return domUser.Mapper(), err
-}
-
-func (ctr *User) Modify(c *gin.Context) (response.Data, error) {
-	req := new(request.UserModify)
-	if err := c.ShouldBind(req); err != nil {
-		return nil, err
-	}
-
-	cmdUser := domain.User{
-		ID:       req.ID,
-		Age:      req.Age,
-		Nickname: req.Nickname,
-		Avatar:   req.Avatar,
-		Bio:      req.Bio,
-	}
-	ctr.repo.Modify(c.Request.Context(), cmdUser)
-	return nil, nil
-}
-
-func (ctr *User) Cash(c *gin.Context) (response.Data, error) {
-	req := new(request.UserCash)
-	if err := c.ShouldBind(req); err != nil {
-		return nil, err
-	}
-	qryAmount := req.Amount
-	if err := qryAmount.CashLimit(); err != nil {
-		return nil, err
-	}
-
-	var userID int64 = 1
-	domUser := ctr.repo.Fetch(c.Request.Context(), userID)
-	if domUser.Amount.Insufficient(qryAmount.Value) {
-		return nil, errors.New("余额不足")
-	}
-
-	ctr.repo.Update(c.Request.Context(), func(opt *ent.UserUpdate) {
-		opt.AddAmount(-qryAmount.Value).Where(user.ID(userID))
-	})
-	return nil, nil
 }

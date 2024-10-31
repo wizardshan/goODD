@@ -1,10 +1,11 @@
 package repository
 
 import (
-	"chapter7/domain"
-	"chapter7/repository/ent"
-	"chapter7/repository/ent/user"
 	"context"
+	"goODD/chapter7/domain"
+	"goODD/chapter7/domain/vo"
+	"goODD/chapter7/repository/ent"
+	"goODD/chapter7/repository/ent/user"
 )
 
 type User struct {
@@ -33,6 +34,12 @@ func (repo *User) Register(ctx context.Context, cmdUser domain.User) (domain.Use
 	return domUser, err
 }
 
+func (repo *User) Find(ctx context.Context, id vo.ID) domain.User {
+	return repo.FetchOne(ctx, func(opt *ent.UserQuery) {
+		opt.Where(user.ID(id.Value))
+	})
+}
+
 func (repo *User) FindOne(ctx context.Context, qryUser domain.User) domain.User {
 	return repo.findOne(ctx, repo.db, qryUser).Mapper()
 }
@@ -52,10 +59,16 @@ func (repo *User) findMany(ctx context.Context, db *ent.Client, qryUser domain.U
 func (repo *User) query(db *ent.Client, qryUser domain.User) *ent.UserQuery {
 	builder := db.User.Query()
 	qryUser.ID.IsPresent(func(v int64) { builder.Where(user.ID(v)) })
+	qryUser.HashID.IsPresent(func(v string) { builder.Where(user.HashID(v)) })
 	qryUser.Mobile.IsPresent(func(v string) { builder.Where(user.Mobile(v)) })
+	qryUser.Password.Hash.IsPresent(func(v string) { builder.Where(user.Password(v)) })
 	qryUser.Age.IsPresent(func(v int64) { builder.Where(user.Age(v)) })
 	qryUser.Level.IsPresent(func(v int64) { builder.Where(user.Level(v)) })
 	qryUser.Nickname.IsPresent(func(v string) { builder.Where(user.Nickname(v)) })
+	qryUser.Avatar.IsPresent(func(v string) { builder.Where(user.Avatar(v)) })
+	qryUser.Bio.IsPresent(func(v string) { builder.Where(user.Bio(v)) })
+	qryUser.Amount.IsPresent(func(v int64) { builder.Where(user.Amount(v)) })
+	qryUser.Status.IsPresent(func(v int64) { builder.Where(user.Status(v)) })
 	return builder
 }
 
@@ -65,10 +78,20 @@ func (repo *User) Save(ctx context.Context, cmdUser domain.User) domain.User {
 
 func (repo *User) save(ctx context.Context, db *ent.Client, cmdUser domain.User) *ent.User {
 	builder := db.User.Create()
+	cmdUser.HashID.IsPresent(func(v string) { builder.SetHashID(v) })
 	cmdUser.Mobile.IsPresent(func(v string) { builder.SetMobile(v) })
+	cmdUser.Password.Hash.IsPresent(func(v string) { builder.SetPassword(v) })
 	cmdUser.Age.IsPresent(func(v int64) { builder.SetAge(v) })
 	cmdUser.Level.IsPresent(func(v int64) { builder.SetLevel(v) })
 	cmdUser.Nickname.IsPresent(func(v string) { builder.SetNickname(v) })
+	cmdUser.Avatar.IsPresent(func(v string) { builder.SetAvatar(v) })
+	cmdUser.Bio.IsPresent(func(v string) { builder.SetBio(v) })
+	cmdUser.Amount.IsPresent(func(v int64) { builder.SetAmount(v) })
+	cmdUser.Status.IsPresent(func(v int64) { builder.SetStatus(v) })
+	if !cmdUser.CreateTime.IsZero() {
+		builder.SetCreateTime(cmdUser.CreateTime)
+	}
+
 	return builder.SaveX(ctx)
 }
 
@@ -78,10 +101,19 @@ func (repo *User) Modify(ctx context.Context, cmdUser domain.User) int {
 
 func (repo *User) modify(ctx context.Context, db *ent.Client, cmdUser domain.User) int {
 	builder := db.User.Update()
+	cmdUser.HashID.IsPresent(func(v string) { builder.SetHashID(v) })
 	cmdUser.Mobile.IsPresent(func(v string) { builder.SetMobile(v) })
+	cmdUser.Password.Hash.IsPresent(func(v string) { builder.SetPassword(v) })
 	cmdUser.Age.IsPresent(func(v int64) { builder.SetAge(v) })
 	cmdUser.Level.IsPresent(func(v int64) { builder.SetLevel(v) })
 	cmdUser.Nickname.IsPresent(func(v string) { builder.SetNickname(v) })
+	cmdUser.Avatar.IsPresent(func(v string) { builder.SetAvatar(v) })
+	cmdUser.Bio.IsPresent(func(v string) { builder.SetBio(v) })
+	cmdUser.Amount.IsPresent(func(v int64) { builder.SetAmount(v) })
+	cmdUser.Status.IsPresent(func(v int64) { builder.SetStatus(v) })
+	if !cmdUser.CreateTime.IsZero() {
+		builder.SetCreateTime(cmdUser.CreateTime)
+	}
 	return builder.Where(user.ID(cmdUser.ID.Value)).SaveX(ctx)
 }
 
@@ -92,10 +124,16 @@ func (repo *User) Remove(ctx context.Context, cmdUser domain.User) int {
 func (repo *User) remove(ctx context.Context, db *ent.Client, cmdUser domain.User) int {
 	builder := db.User.Delete()
 	cmdUser.ID.IsPresent(func(v int64) { builder.Where(user.ID(v)) })
+	cmdUser.HashID.IsPresent(func(v string) { builder.Where(user.HashID(v)) })
 	cmdUser.Mobile.IsPresent(func(v string) { builder.Where(user.Mobile(v)) })
+	cmdUser.Password.Hash.IsPresent(func(v string) { builder.Where(user.Password(v)) })
 	cmdUser.Age.IsPresent(func(v int64) { builder.Where(user.Age(v)) })
 	cmdUser.Level.IsPresent(func(v int64) { builder.Where(user.Level(v)) })
 	cmdUser.Nickname.IsPresent(func(v string) { builder.Where(user.Nickname(v)) })
+	cmdUser.Avatar.IsPresent(func(v string) { builder.Where(user.Avatar(v)) })
+	cmdUser.Bio.IsPresent(func(v string) { builder.Where(user.Bio(v)) })
+	cmdUser.Amount.IsPresent(func(v int64) { builder.Where(user.Amount(v)) })
+	cmdUser.Status.IsPresent(func(v int64) { builder.Where(user.Status(v)) })
 	return builder.ExecX(ctx)
 }
 

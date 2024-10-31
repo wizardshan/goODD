@@ -1,15 +1,13 @@
 package user
 
 import (
-	"chapter7/domain/vo"
-	"chapter7/rpc/domain/user"
 	"errors"
+	"goODD/chapter7/domain/vo"
 )
 
 type Amount struct {
+	vo.Int64Value
 	vo.Money
-	user.Amount
-	Set bool
 }
 
 func (o *Amount) CashLimit() error {
@@ -33,21 +31,4 @@ func (o *Amount) ConvertFen(v float64) int64 {
 
 func (o *Amount) ConvertYuan() float64 {
 	return o.Money.ConvertYuan(o.Value)
-}
-
-func (o *Amount) IsPresent(f func(v int64)) {
-	if o.Set {
-		f(o.Value)
-	}
-}
-
-func (o *Amount) SetTo(v int64) {
-	o.Set = true
-	o.Value = v
-}
-
-func (o *Amount) SetToPb(v *user.Amount) {
-	if v != nil {
-		o.SetTo(v.Value)
-	}
 }

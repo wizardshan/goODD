@@ -1,27 +1,14 @@
 package main
 
 import (
-	"chapter7/controller"
-	"chapter7/repository"
-	"chapter7/repository/ent"
-	"chapter7/rpc/rpcconnect"
-	"connectrpc.com/connect"
-	"connectrpc.com/grpcreflect"
-	"connectrpc.com/validate"
+	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
-	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
-	"log"
-	"net/http"
+	"goODD/chapter7/controller"
+	"goODD/chapter7/repository"
+	"goODD/chapter7/repository/ent"
 )
 
 func main() {
-
-	interceptor, err := validate.NewInterceptor()
-	if err != nil {
-		log.Fatal(err)
-	}
-	interceptors := connect.WithInterceptors(interceptor)
 
 	dsn := "root:123456@tcp(127.0.0.1:3306)/odd?charset=utf8mb4&parseTime=true"
 	db, err := ent.Open("mysql", dsn)
@@ -29,24 +16,19 @@ func main() {
 		panic(err)
 	}
 
+	engine := gin.New()
+
 	repoUser := repository.NewUser(db)
 	ctrUser := controller.NewUser(repoUser)
+	engine.POST("/user/:id", controller.Wrapper(ctrUser.FetchOne))
+	engine.POST("/user", controller.Wrapper(ctrUser.One))
+	engine.POST("/users", controller.Wrapper(ctrUser.Many))
+	engine.POST("/user/register", controller.Wrapper(ctrUser.Register))
+	engine.POST("/user/sms/register", controller.Wrapper(ctrUser.SmsRegister))
+	engine.POST("/user/login", controller.Wrapper(ctrUser.Login))
+	engine.POST("/user/modify", controller.Wrapper(ctrUser.Modify))
+	engine.POST("/user/cash", controller.Wrapper(ctrUser.Cash))
+	engine.POST("/user/changePassword", controller.Wrapper(ctrUser.ChangePassword))
 
-	mux := http.NewServeMux()
-	mux.Handle(rpcconnect.NewUserHandler(ctrUser, interceptors))
-
-	mux.Handle(grpcreflect.NewHandlerV1(
-		grpcreflect.NewStaticReflector(rpcconnect.UserName),
-	))
-	mux.Handle(grpcreflect.NewHandlerV1Alpha(
-		grpcreflect.NewStaticReflector(rpcconnect.UserName),
-	))
-
-	err = http.ListenAndServe(
-		"localhost:8080",
-		h2c.NewHandler(mux, &http2.Server{}),
-	)
-	if err != nil {
-		log.Fatalf("listen failed: %v", err)
-	}
+	engine.Run()
 }

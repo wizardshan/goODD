@@ -1,37 +1,47 @@
 package user
 
 import (
-	"chapter7/pkg/crypt"
-	"chapter7/rpc/domain/user"
+	"github.com/tidwall/gjson"
+	"goODD/chapter7/domain/vo"
+	"goODD/chapter7/pkg/crypt"
+	"goODD/chapter7/pkg/validate"
 )
 
 type Password struct {
-	user.Password
-	Set       bool
-	HashValue string
+	vo.StringValue
+	Hash vo.StringValue
 }
 
 func (o *Password) Encode() {
-	o.HashValue = crypt.PasswordHash(o.Value)
+	o.Hash.SetTo(crypt.PasswordHash(o.Value))
 }
 
 func (o *Password) Verify(v string) bool {
-	return crypt.PasswordVerify(v, o.HashValue)
+	return crypt.PasswordVerify(v, o.Hash.Value)
 }
 
-func (o *Password) IsPresent(f func(v string)) {
+func (o *Password) ValidateOmit() error {
 	if o.Set {
-		f(o.Value)
+		return o.Validate()
 	}
+	return nil
 }
 
-func (o *Password) SetTo(v string) {
-	o.Set = true
-	o.Value = v
+func (o *Password) Validate() error {
+	return validate.Var(o.Value, "min=6,max=20")
 }
 
-func (o *Password) SetToPb(v *user.Password) {
-	if v != nil {
-		o.SetTo(v.Value)
+func (o *Password) UnmarshalJSON(data []byte) error {
+	if data[0] != '{' {
+		o.SetTo(gjson.ParseBytes(data).String())
+		o.Encode()
+		return nil
 	}
+
+	result := gjson.GetBytes(data, "Value")
+	if result.Exists() {
+		o.SetTo(result.String())
+		o.Encode()
+	}
+	return nil
 }

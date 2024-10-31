@@ -1,32 +1,20 @@
 package vo
 
-import "github.com/tidwall/gjson"
+import (
+	"goODD/chapter5/pkg/validate"
+)
 
 type ID struct {
-	Value int64 `binding:"min=1"`
-	Set   bool
+	Int64Value
 }
 
-func (o *ID) IsPresent(f func(v int64)) {
+func (o *ID) ValidateOmit() error {
 	if o.Set {
-		f(o.Value)
-	}
-}
-
-func (o *ID) SetTo(v int64) {
-	o.Set = true
-	o.Value = v
-}
-
-func (o *ID) UnmarshalJSON(data []byte) error {
-	if data[0] != '{' {
-		o.SetTo(gjson.ParseBytes(data).Int())
-		return nil
-	}
-
-	result := gjson.GetBytes(data, "Value")
-	if result.Exists() {
-		o.SetTo(result.Int())
+		return o.Validate()
 	}
 	return nil
+}
+
+func (o *ID) Validate() error {
+	return validate.Var(o.Value, "min=1")
 }

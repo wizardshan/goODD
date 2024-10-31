@@ -20,6 +20,7 @@ var (
 		{Name: "avatar", Type: field.TypeString, Default: ""},
 		{Name: "bio", Type: field.TypeString, Default: ""},
 		{Name: "amount", Type: field.TypeInt64, Default: 0},
+		{Name: "status", Type: field.TypeInt64, Default: 0},
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
 	}

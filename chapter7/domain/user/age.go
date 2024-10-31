@@ -1,27 +1,21 @@
 package user
 
 import (
-	"chapter7/rpc/domain/user"
+	"goODD/chapter5/domain/vo"
+	"goODD/chapter5/pkg/validate"
 )
 
 type Age struct {
-	user.Age
-	Set bool
+	vo.Int64Value
 }
 
-func (o *Age) IsPresent(f func(v int64)) {
+func (o *Age) ValidateOmit() error {
 	if o.Set {
-		f(o.Value)
+		return o.Validate()
 	}
+	return nil
 }
 
-func (o *Age) SetTo(v int64) {
-	o.Set = true
-	o.Value = v
-}
-
-func (o *Age) SetToPb(v *user.Age) {
-	if v != nil {
-		o.SetTo(v.Value)
-	}
+func (o *Age) Validate() error {
+	return validate.Var(o.Value, "min=1,max=120")
 }

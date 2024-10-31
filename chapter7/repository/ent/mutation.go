@@ -6,8 +6,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"chapter7/repository/ent/predicate"
-	"chapter7/repository/ent/user"
+	"goODD/chapter7/repository/ent/predicate"
+	"goODD/chapter7/repository/ent/user"
 	"sync"
 	"time"
 
@@ -45,6 +45,8 @@ type UserMutation struct {
 	bio           *string
 	amount        *int64
 	addamount     *int64
+	status        *int64
+	addstatus     *int64
 	create_time   *time.Time
 	update_time   *time.Time
 	clearedFields map[string]struct{}
@@ -541,6 +543,62 @@ func (m *UserMutation) ResetAmount() {
 	m.addamount = nil
 }
 
+// SetStatus sets the "status" field.
+func (m *UserMutation) SetStatus(i int64) {
+	m.status = &i
+	m.addstatus = nil
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *UserMutation) Status() (r int64, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldStatus(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// AddStatus adds i to the "status" field.
+func (m *UserMutation) AddStatus(i int64) {
+	if m.addstatus != nil {
+		*m.addstatus += i
+	} else {
+		m.addstatus = &i
+	}
+}
+
+// AddedStatus returns the value that was added to the "status" field in this mutation.
+func (m *UserMutation) AddedStatus() (r int64, exists bool) {
+	v := m.addstatus
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *UserMutation) ResetStatus() {
+	m.status = nil
+	m.addstatus = nil
+}
+
 // SetCreateTime sets the "create_time" field.
 func (m *UserMutation) SetCreateTime(t time.Time) {
 	m.create_time = &t
@@ -647,7 +705,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 12)
 	if m.hash_id != nil {
 		fields = append(fields, user.FieldHashID)
 	}
@@ -674,6 +732,9 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.amount != nil {
 		fields = append(fields, user.FieldAmount)
+	}
+	if m.status != nil {
+		fields = append(fields, user.FieldStatus)
 	}
 	if m.create_time != nil {
 		fields = append(fields, user.FieldCreateTime)
@@ -707,6 +768,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Bio()
 	case user.FieldAmount:
 		return m.Amount()
+	case user.FieldStatus:
+		return m.Status()
 	case user.FieldCreateTime:
 		return m.CreateTime()
 	case user.FieldUpdateTime:
@@ -738,6 +801,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldBio(ctx)
 	case user.FieldAmount:
 		return m.OldAmount(ctx)
+	case user.FieldStatus:
+		return m.OldStatus(ctx)
 	case user.FieldCreateTime:
 		return m.OldCreateTime(ctx)
 	case user.FieldUpdateTime:
@@ -814,6 +879,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetAmount(v)
 		return nil
+	case user.FieldStatus:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
 	case user.FieldCreateTime:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -845,6 +917,9 @@ func (m *UserMutation) AddedFields() []string {
 	if m.addamount != nil {
 		fields = append(fields, user.FieldAmount)
 	}
+	if m.addstatus != nil {
+		fields = append(fields, user.FieldStatus)
+	}
 	return fields
 }
 
@@ -859,6 +934,8 @@ func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedLevel()
 	case user.FieldAmount:
 		return m.AddedAmount()
+	case user.FieldStatus:
+		return m.AddedStatus()
 	}
 	return nil, false
 }
@@ -888,6 +965,13 @@ func (m *UserMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddAmount(v)
+		return nil
+	case user.FieldStatus:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddStatus(v)
 		return nil
 	}
 	return fmt.Errorf("unknown User numeric field %s", name)
@@ -942,6 +1026,9 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldAmount:
 		m.ResetAmount()
+		return nil
+	case user.FieldStatus:
+		m.ResetStatus()
 		return nil
 	case user.FieldCreateTime:
 		m.ResetCreateTime()

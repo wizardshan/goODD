@@ -18,22 +18,6 @@ func NewUser(db *ent.Client) *User {
 	return repo
 }
 
-func (repo *User) Register(ctx context.Context, cmdUser domain.User) (domain.User, error) {
-	var domUser domain.User
-	err := repo.withTx(ctx, repo.db, func(tx *ent.Tx) error {
-		db := tx.Client()
-		domUser = repo.save(ctx, db, cmdUser).Mapper()
-
-		domUser.HashID.ID = domUser.ID.Value
-		domUser.HashID.Encode()
-		repo.update(ctx, db, func(opt *ent.UserUpdate) {
-			opt.SetHashID(domUser.HashID.Value).Where(user.ID(domUser.ID.Value))
-		})
-		return nil
-	})
-	return domUser, err
-}
-
 func (repo *User) Find(ctx context.Context, id vo.ID) domain.User {
 	return repo.FetchOne(ctx, func(opt *ent.UserQuery) {
 		opt.Where(user.ID(id.Value))

@@ -20,20 +20,6 @@ type UserCreate struct {
 	hooks    []Hook
 }
 
-// SetHashID sets the "hash_id" field.
-func (uc *UserCreate) SetHashID(s string) *UserCreate {
-	uc.mutation.SetHashID(s)
-	return uc
-}
-
-// SetNillableHashID sets the "hash_id" field if the given value is not nil.
-func (uc *UserCreate) SetNillableHashID(s *string) *UserCreate {
-	if s != nil {
-		uc.SetHashID(*s)
-	}
-	return uc
-}
-
 // SetMobile sets the "mobile" field.
 func (uc *UserCreate) SetMobile(s string) *UserCreate {
 	uc.mutation.SetMobile(s)
@@ -44,20 +30,6 @@ func (uc *UserCreate) SetMobile(s string) *UserCreate {
 func (uc *UserCreate) SetNillableMobile(s *string) *UserCreate {
 	if s != nil {
 		uc.SetMobile(*s)
-	}
-	return uc
-}
-
-// SetPassword sets the "password" field.
-func (uc *UserCreate) SetPassword(s string) *UserCreate {
-	uc.mutation.SetPassword(s)
-	return uc
-}
-
-// SetNillablePassword sets the "password" field if the given value is not nil.
-func (uc *UserCreate) SetNillablePassword(s *string) *UserCreate {
-	if s != nil {
-		uc.SetPassword(*s)
 	}
 	return uc
 }
@@ -104,48 +76,6 @@ func (uc *UserCreate) SetNillableNickname(s *string) *UserCreate {
 	return uc
 }
 
-// SetAvatar sets the "avatar" field.
-func (uc *UserCreate) SetAvatar(s string) *UserCreate {
-	uc.mutation.SetAvatar(s)
-	return uc
-}
-
-// SetNillableAvatar sets the "avatar" field if the given value is not nil.
-func (uc *UserCreate) SetNillableAvatar(s *string) *UserCreate {
-	if s != nil {
-		uc.SetAvatar(*s)
-	}
-	return uc
-}
-
-// SetBio sets the "bio" field.
-func (uc *UserCreate) SetBio(s string) *UserCreate {
-	uc.mutation.SetBio(s)
-	return uc
-}
-
-// SetNillableBio sets the "bio" field if the given value is not nil.
-func (uc *UserCreate) SetNillableBio(s *string) *UserCreate {
-	if s != nil {
-		uc.SetBio(*s)
-	}
-	return uc
-}
-
-// SetAmount sets the "amount" field.
-func (uc *UserCreate) SetAmount(i int64) *UserCreate {
-	uc.mutation.SetAmount(i)
-	return uc
-}
-
-// SetNillableAmount sets the "amount" field if the given value is not nil.
-func (uc *UserCreate) SetNillableAmount(i *int64) *UserCreate {
-	if i != nil {
-		uc.SetAmount(*i)
-	}
-	return uc
-}
-
 // SetCreateTime sets the "create_time" field.
 func (uc *UserCreate) SetCreateTime(t time.Time) *UserCreate {
 	uc.mutation.SetCreateTime(t)
@@ -156,20 +86,6 @@ func (uc *UserCreate) SetCreateTime(t time.Time) *UserCreate {
 func (uc *UserCreate) SetNillableCreateTime(t *time.Time) *UserCreate {
 	if t != nil {
 		uc.SetCreateTime(*t)
-	}
-	return uc
-}
-
-// SetUpdateTime sets the "update_time" field.
-func (uc *UserCreate) SetUpdateTime(t time.Time) *UserCreate {
-	uc.mutation.SetUpdateTime(t)
-	return uc
-}
-
-// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
-func (uc *UserCreate) SetNillableUpdateTime(t *time.Time) *UserCreate {
-	if t != nil {
-		uc.SetUpdateTime(*t)
 	}
 	return uc
 }
@@ -215,17 +131,9 @@ func (uc *UserCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (uc *UserCreate) defaults() {
-	if _, ok := uc.mutation.HashID(); !ok {
-		v := user.DefaultHashID
-		uc.mutation.SetHashID(v)
-	}
 	if _, ok := uc.mutation.Mobile(); !ok {
 		v := user.DefaultMobile
 		uc.mutation.SetMobile(v)
-	}
-	if _, ok := uc.mutation.Password(); !ok {
-		v := user.DefaultPassword
-		uc.mutation.SetPassword(v)
 	}
 	if _, ok := uc.mutation.Age(); !ok {
 		v := user.DefaultAge
@@ -239,38 +147,16 @@ func (uc *UserCreate) defaults() {
 		v := user.DefaultNickname
 		uc.mutation.SetNickname(v)
 	}
-	if _, ok := uc.mutation.Avatar(); !ok {
-		v := user.DefaultAvatar
-		uc.mutation.SetAvatar(v)
-	}
-	if _, ok := uc.mutation.Bio(); !ok {
-		v := user.DefaultBio
-		uc.mutation.SetBio(v)
-	}
-	if _, ok := uc.mutation.Amount(); !ok {
-		v := user.DefaultAmount
-		uc.mutation.SetAmount(v)
-	}
 	if _, ok := uc.mutation.CreateTime(); !ok {
 		v := user.DefaultCreateTime()
 		uc.mutation.SetCreateTime(v)
-	}
-	if _, ok := uc.mutation.UpdateTime(); !ok {
-		v := user.DefaultUpdateTime()
-		uc.mutation.SetUpdateTime(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (uc *UserCreate) check() error {
-	if _, ok := uc.mutation.HashID(); !ok {
-		return &ValidationError{Name: "hash_id", err: errors.New(`ent: missing required field "User.hash_id"`)}
-	}
 	if _, ok := uc.mutation.Mobile(); !ok {
 		return &ValidationError{Name: "mobile", err: errors.New(`ent: missing required field "User.mobile"`)}
-	}
-	if _, ok := uc.mutation.Password(); !ok {
-		return &ValidationError{Name: "password", err: errors.New(`ent: missing required field "User.password"`)}
 	}
 	if _, ok := uc.mutation.Age(); !ok {
 		return &ValidationError{Name: "age", err: errors.New(`ent: missing required field "User.age"`)}
@@ -281,20 +167,8 @@ func (uc *UserCreate) check() error {
 	if _, ok := uc.mutation.Nickname(); !ok {
 		return &ValidationError{Name: "nickname", err: errors.New(`ent: missing required field "User.nickname"`)}
 	}
-	if _, ok := uc.mutation.Avatar(); !ok {
-		return &ValidationError{Name: "avatar", err: errors.New(`ent: missing required field "User.avatar"`)}
-	}
-	if _, ok := uc.mutation.Bio(); !ok {
-		return &ValidationError{Name: "bio", err: errors.New(`ent: missing required field "User.bio"`)}
-	}
-	if _, ok := uc.mutation.Amount(); !ok {
-		return &ValidationError{Name: "amount", err: errors.New(`ent: missing required field "User.amount"`)}
-	}
 	if _, ok := uc.mutation.CreateTime(); !ok {
 		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "User.create_time"`)}
-	}
-	if _, ok := uc.mutation.UpdateTime(); !ok {
-		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "User.update_time"`)}
 	}
 	return nil
 }
@@ -328,17 +202,9 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := uc.mutation.HashID(); ok {
-		_spec.SetField(user.FieldHashID, field.TypeString, value)
-		_node.HashID = value
-	}
 	if value, ok := uc.mutation.Mobile(); ok {
 		_spec.SetField(user.FieldMobile, field.TypeString, value)
 		_node.Mobile = value
-	}
-	if value, ok := uc.mutation.Password(); ok {
-		_spec.SetField(user.FieldPassword, field.TypeString, value)
-		_node.Password = value
 	}
 	if value, ok := uc.mutation.Age(); ok {
 		_spec.SetField(user.FieldAge, field.TypeInt64, value)
@@ -352,25 +218,9 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_spec.SetField(user.FieldNickname, field.TypeString, value)
 		_node.Nickname = value
 	}
-	if value, ok := uc.mutation.Avatar(); ok {
-		_spec.SetField(user.FieldAvatar, field.TypeString, value)
-		_node.Avatar = value
-	}
-	if value, ok := uc.mutation.Bio(); ok {
-		_spec.SetField(user.FieldBio, field.TypeString, value)
-		_node.Bio = value
-	}
-	if value, ok := uc.mutation.Amount(); ok {
-		_spec.SetField(user.FieldAmount, field.TypeInt64, value)
-		_node.Amount = value
-	}
 	if value, ok := uc.mutation.CreateTime(); ok {
 		_spec.SetField(user.FieldCreateTime, field.TypeTime, value)
 		_node.CreateTime = value
-	}
-	if value, ok := uc.mutation.UpdateTime(); ok {
-		_spec.SetField(user.FieldUpdateTime, field.TypeTime, value)
-		_node.UpdateTime = value
 	}
 	return _node, _spec
 }

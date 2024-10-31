@@ -6,8 +6,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"chapter7/repository/ent/predicate"
-	"chapter7/repository/ent/user"
+	"goODD/chapter7/repository/ent/predicate"
+	"goODD/chapter7/repository/ent/user"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -175,6 +175,27 @@ func (uu *UserUpdate) AddAmount(i int64) *UserUpdate {
 	return uu
 }
 
+// SetStatus sets the "status" field.
+func (uu *UserUpdate) SetStatus(i int64) *UserUpdate {
+	uu.mutation.ResetStatus()
+	uu.mutation.SetStatus(i)
+	return uu
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableStatus(i *int64) *UserUpdate {
+	if i != nil {
+		uu.SetStatus(*i)
+	}
+	return uu
+}
+
+// AddStatus adds i to the "status" field.
+func (uu *UserUpdate) AddStatus(i int64) *UserUpdate {
+	uu.mutation.AddStatus(i)
+	return uu
+}
+
 // SetCreateTime sets the "create_time" field.
 func (uu *UserUpdate) SetCreateTime(t time.Time) *UserUpdate {
 	uu.mutation.SetCreateTime(t)
@@ -280,6 +301,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := uu.mutation.AddedAmount(); ok {
 		_spec.AddField(user.FieldAmount, field.TypeInt64, value)
+	}
+	if value, ok := uu.mutation.Status(); ok {
+		_spec.SetField(user.FieldStatus, field.TypeInt64, value)
+	}
+	if value, ok := uu.mutation.AddedStatus(); ok {
+		_spec.AddField(user.FieldStatus, field.TypeInt64, value)
 	}
 	if value, ok := uu.mutation.CreateTime(); ok {
 		_spec.SetField(user.FieldCreateTime, field.TypeTime, value)
@@ -454,6 +481,27 @@ func (uuo *UserUpdateOne) AddAmount(i int64) *UserUpdateOne {
 	return uuo
 }
 
+// SetStatus sets the "status" field.
+func (uuo *UserUpdateOne) SetStatus(i int64) *UserUpdateOne {
+	uuo.mutation.ResetStatus()
+	uuo.mutation.SetStatus(i)
+	return uuo
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableStatus(i *int64) *UserUpdateOne {
+	if i != nil {
+		uuo.SetStatus(*i)
+	}
+	return uuo
+}
+
+// AddStatus adds i to the "status" field.
+func (uuo *UserUpdateOne) AddStatus(i int64) *UserUpdateOne {
+	uuo.mutation.AddStatus(i)
+	return uuo
+}
+
 // SetCreateTime sets the "create_time" field.
 func (uuo *UserUpdateOne) SetCreateTime(t time.Time) *UserUpdateOne {
 	uuo.mutation.SetCreateTime(t)
@@ -589,6 +637,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	if value, ok := uuo.mutation.AddedAmount(); ok {
 		_spec.AddField(user.FieldAmount, field.TypeInt64, value)
+	}
+	if value, ok := uuo.mutation.Status(); ok {
+		_spec.SetField(user.FieldStatus, field.TypeInt64, value)
+	}
+	if value, ok := uuo.mutation.AddedStatus(); ok {
+		_spec.AddField(user.FieldStatus, field.TypeInt64, value)
 	}
 	if value, ok := uuo.mutation.CreateTime(); ok {
 		_spec.SetField(user.FieldCreateTime, field.TypeTime, value)

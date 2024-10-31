@@ -1,27 +1,21 @@
 package user
 
 import (
-	"chapter7/rpc/domain/user"
+	"goODD/chapter5/domain/vo"
+	"goODD/chapter5/pkg/validate"
 )
 
 type Nickname struct {
-	user.Nickname
-	Set bool
+	vo.StringValue
 }
 
-func (o *Nickname) IsPresent(f func(v string)) {
+func (o *Nickname) ValidateOmit() error {
 	if o.Set {
-		f(o.Value)
+		return o.Validate()
 	}
+	return nil
 }
 
-func (o *Nickname) SetTo(v string) {
-	o.Set = true
-	o.Value = v
-}
-
-func (o *Nickname) SetToPb(v *user.Nickname) {
-	if v != nil {
-		o.SetTo(v.Value)
-	}
+func (o *Nickname) Validate() error {
+	return validate.Var(o.Value, "min=2,max=10")
 }

@@ -1,7 +1,8 @@
 package user
 
 import (
-	"chapter7/rpc/domain/user"
+	"goODD/chapter5/domain/vo"
+	"goODD/chapter5/pkg/validate"
 )
 
 const (
@@ -11,7 +12,7 @@ const (
 	LevelPlatinum = 30
 )
 
-type Levels []*user.Level
+type Levels []Level
 
 func (o Levels) IsPresent(f func(v []int64)) {
 	if len(o) != 0 {
@@ -28,8 +29,7 @@ func (o Levels) Values() []int64 {
 }
 
 type Level struct {
-	user.Level
-	Set bool
+	vo.Int64Value
 }
 
 func (o *Level) Desc() string {
@@ -46,19 +46,13 @@ func (o *Level) Desc() string {
 	return "未知"
 }
 
-func (o *Level) IsPresent(f func(v int64)) {
+func (o *Level) ValidateOmit() error {
 	if o.Set {
-		f(o.Value)
+		return o.Validate()
 	}
+	return nil
 }
 
-func (o *Level) SetTo(v int64) {
-	o.Set = true
-	o.Value = v
-}
-
-func (o *Level) SetToPb(v *user.Level) {
-	if v != nil {
-		o.SetTo(v.Value)
-	}
+func (o *Level) Validate() error {
+	return validate.Var(o.Value, "oneof=0 10 20 30")
 }

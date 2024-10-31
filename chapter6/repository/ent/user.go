@@ -17,28 +17,16 @@ type User struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int64 `json:"id,omitempty"`
-	// HashID holds the value of the "hash_id" field.
-	HashID string `json:"hash_id,omitempty"`
 	// Mobile holds the value of the "mobile" field.
 	Mobile string `json:"mobile,omitempty"`
-	// Password holds the value of the "password" field.
-	Password string `json:"password,omitempty"`
 	// Age holds the value of the "age" field.
 	Age int64 `json:"age,omitempty"`
 	// Level holds the value of the "level" field.
 	Level int64 `json:"level,omitempty"`
 	// Nickname holds the value of the "nickname" field.
 	Nickname string `json:"nickname,omitempty"`
-	// Avatar holds the value of the "avatar" field.
-	Avatar string `json:"avatar,omitempty"`
-	// Bio holds the value of the "bio" field.
-	Bio string `json:"bio,omitempty"`
-	// Amount holds the value of the "amount" field.
-	Amount int64 `json:"amount,omitempty"`
 	// CreateTime holds the value of the "create_time" field.
-	CreateTime time.Time `json:"create_time,omitempty"`
-	// UpdateTime holds the value of the "update_time" field.
-	UpdateTime   time.Time `json:"update_time,omitempty"`
+	CreateTime   time.Time `json:"create_time,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -47,11 +35,11 @@ func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldID, user.FieldAge, user.FieldLevel, user.FieldAmount:
+		case user.FieldID, user.FieldAge, user.FieldLevel:
 			values[i] = new(sql.NullInt64)
-		case user.FieldHashID, user.FieldMobile, user.FieldPassword, user.FieldNickname, user.FieldAvatar, user.FieldBio:
+		case user.FieldMobile, user.FieldNickname:
 			values[i] = new(sql.NullString)
-		case user.FieldCreateTime, user.FieldUpdateTime:
+		case user.FieldCreateTime:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -74,23 +62,11 @@ func (u *User) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			u.ID = int64(value.Int64)
-		case user.FieldHashID:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field hash_id", values[i])
-			} else if value.Valid {
-				u.HashID = value.String
-			}
 		case user.FieldMobile:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field mobile", values[i])
 			} else if value.Valid {
 				u.Mobile = value.String
-			}
-		case user.FieldPassword:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field password", values[i])
-			} else if value.Valid {
-				u.Password = value.String
 			}
 		case user.FieldAge:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -110,35 +86,11 @@ func (u *User) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				u.Nickname = value.String
 			}
-		case user.FieldAvatar:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field avatar", values[i])
-			} else if value.Valid {
-				u.Avatar = value.String
-			}
-		case user.FieldBio:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field bio", values[i])
-			} else if value.Valid {
-				u.Bio = value.String
-			}
-		case user.FieldAmount:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field amount", values[i])
-			} else if value.Valid {
-				u.Amount = value.Int64
-			}
 		case user.FieldCreateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field create_time", values[i])
 			} else if value.Valid {
 				u.CreateTime = value.Time
-			}
-		case user.FieldUpdateTime:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field update_time", values[i])
-			} else if value.Valid {
-				u.UpdateTime = value.Time
 			}
 		default:
 			u.selectValues.Set(columns[i], values[i])
@@ -176,14 +128,8 @@ func (u *User) String() string {
 	var builder strings.Builder
 	builder.WriteString("User(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", u.ID))
-	builder.WriteString("hash_id=")
-	builder.WriteString(u.HashID)
-	builder.WriteString(", ")
 	builder.WriteString("mobile=")
 	builder.WriteString(u.Mobile)
-	builder.WriteString(", ")
-	builder.WriteString("password=")
-	builder.WriteString(u.Password)
 	builder.WriteString(", ")
 	builder.WriteString("age=")
 	builder.WriteString(fmt.Sprintf("%v", u.Age))
@@ -194,20 +140,8 @@ func (u *User) String() string {
 	builder.WriteString("nickname=")
 	builder.WriteString(u.Nickname)
 	builder.WriteString(", ")
-	builder.WriteString("avatar=")
-	builder.WriteString(u.Avatar)
-	builder.WriteString(", ")
-	builder.WriteString("bio=")
-	builder.WriteString(u.Bio)
-	builder.WriteString(", ")
-	builder.WriteString("amount=")
-	builder.WriteString(fmt.Sprintf("%v", u.Amount))
-	builder.WriteString(", ")
 	builder.WriteString("create_time=")
 	builder.WriteString(u.CreateTime.Format(time.ANSIC))
-	builder.WriteString(", ")
-	builder.WriteString("update_time=")
-	builder.WriteString(u.UpdateTime.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

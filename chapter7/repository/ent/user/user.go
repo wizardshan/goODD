@@ -31,6 +31,8 @@ const (
 	FieldBio = "bio"
 	// FieldAmount holds the string denoting the amount field in the database.
 	FieldAmount = "amount"
+	// FieldStatus holds the string denoting the status field in the database.
+	FieldStatus = "status"
 	// FieldCreateTime holds the string denoting the create_time field in the database.
 	FieldCreateTime = "create_time"
 	// FieldUpdateTime holds the string denoting the update_time field in the database.
@@ -51,6 +53,7 @@ var Columns = []string{
 	FieldAvatar,
 	FieldBio,
 	FieldAmount,
+	FieldStatus,
 	FieldCreateTime,
 	FieldUpdateTime,
 }
@@ -84,6 +87,8 @@ var (
 	DefaultBio string
 	// DefaultAmount holds the default value on creation for the "amount" field.
 	DefaultAmount int64
+	// DefaultStatus holds the default value on creation for the "status" field.
+	DefaultStatus int64
 	// DefaultCreateTime holds the default value on creation for the "create_time" field.
 	DefaultCreateTime func() time.Time
 	// DefaultUpdateTime holds the default value on creation for the "update_time" field.
@@ -143,6 +148,11 @@ func ByBio(opts ...sql.OrderTermOption) OrderOption {
 // ByAmount orders the results by the amount field.
 func ByAmount(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAmount, opts...).ToFunc()
+}
+
+// ByStatus orders the results by the status field.
+func ByStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStatus, opts...).ToFunc()
 }
 
 // ByCreateTime orders the results by the create_time field.

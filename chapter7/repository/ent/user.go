@@ -4,7 +4,7 @@ package ent
 
 import (
 	"fmt"
-	"chapter7/repository/ent/user"
+	"goODD/chapter7/repository/ent/user"
 	"strings"
 	"time"
 
@@ -35,6 +35,8 @@ type User struct {
 	Bio string `json:"bio,omitempty"`
 	// Amount holds the value of the "amount" field.
 	Amount int64 `json:"amount,omitempty"`
+	// Status holds the value of the "status" field.
+	Status int64 `json:"status,omitempty"`
 	// CreateTime holds the value of the "create_time" field.
 	CreateTime time.Time `json:"create_time,omitempty"`
 	// UpdateTime holds the value of the "update_time" field.
@@ -47,7 +49,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldID, user.FieldAge, user.FieldLevel, user.FieldAmount:
+		case user.FieldID, user.FieldAge, user.FieldLevel, user.FieldAmount, user.FieldStatus:
 			values[i] = new(sql.NullInt64)
 		case user.FieldHashID, user.FieldMobile, user.FieldPassword, user.FieldNickname, user.FieldAvatar, user.FieldBio:
 			values[i] = new(sql.NullString)
@@ -128,6 +130,12 @@ func (u *User) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				u.Amount = value.Int64
 			}
+		case user.FieldStatus:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field status", values[i])
+			} else if value.Valid {
+				u.Status = value.Int64
+			}
 		case user.FieldCreateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field create_time", values[i])
@@ -202,6 +210,9 @@ func (u *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("amount=")
 	builder.WriteString(fmt.Sprintf("%v", u.Amount))
+	builder.WriteString(", ")
+	builder.WriteString("status=")
+	builder.WriteString(fmt.Sprintf("%v", u.Status))
 	builder.WriteString(", ")
 	builder.WriteString("create_time=")
 	builder.WriteString(u.CreateTime.Format(time.ANSIC))

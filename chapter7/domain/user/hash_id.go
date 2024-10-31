@@ -1,14 +1,15 @@
 package user
 
 import (
-	"chapter7/pkg/idx"
-	"chapter7/rpc/domain/user"
 	"errors"
+	"github.com/tidwall/gjson"
+	"goODD/chapter7/domain/vo"
+	"goODD/chapter7/pkg/idx"
+	"goODD/chapter7/pkg/validate"
 )
 
 type HashID struct {
-	user.HashID
-	Set      bool
+	vo.StringValue
 	ID       int64
 	category int64
 }
@@ -31,19 +32,27 @@ func (o *HashID) Decode() (err error) {
 	return
 }
 
-func (o *HashID) IsPresent(f func(v string)) {
+func (o *HashID) ValidateOmit() error {
 	if o.Set {
-		f(o.Value)
+		return o.Validate()
 	}
+	return nil
 }
 
-func (o *HashID) SetTo(v string) {
-	o.Set = true
-	o.Value = v
+func (o *HashID) Validate() error {
+	return validate.Var(o.Value, "alphanum")
 }
 
-func (o *HashID) SetToPb(v *user.HashID) {
-	if v != nil {
-		o.SetTo(v.Value)
+func (o *HashID) UnmarshalJSON(data []byte) error {
+	if data[0] != '{' {
+		o.SetTo(gjson.ParseBytes(data).String())
+		return o.Decode()
 	}
+
+	result := gjson.GetBytes(data, "Value")
+	if result.Exists() {
+		o.SetTo(result.String())
+		return o.Decode()
+	}
+	return nil
 }
