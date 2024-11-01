@@ -7,28 +7,9 @@ type StringValue struct {
 	Set   bool
 }
 
-func (o *StringValue) IsPresent(f func(v string)) {
-	if o.Set {
-		f(o.Value)
-	}
-}
-
-func (o *StringValue) Reset() {
-	var v string
-	o.Value = v
-	o.Set = false
-}
-
 func (o *StringValue) SetTo(v string) {
 	o.Set = true
 	o.Value = v
-}
-
-func (o *StringValue) Or(d string) string {
-	if o.Set {
-		return o.Value
-	}
-	return d
 }
 
 func (o *StringValue) UnmarshalJSON(data []byte) error {

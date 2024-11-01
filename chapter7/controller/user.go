@@ -97,6 +97,14 @@ func (ctr *User) Login(c *gin.Context) (response.Data, error) {
 		opt.Where(user.Mobile(req.Mobile.Value))
 	})
 
+	if domUser.Status.IsForbid() {
+		return nil, errors.New("此手机号已被禁止登录，如有疑问，请联系客服")
+	}
+
+	if domUser.Status.IsCancel() {
+		return nil, errors.New("此账号已被注销，请重新注册")
+	}
+
 	if !domUser.Password.Verify(req.Password.Value) {
 		return nil, errors.New("密码错误")
 	}

@@ -1,11 +1,10 @@
 package validate
 
 import (
-	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 )
 
-var validate = binding.Validator.Engine().(*validator.Validate)
+var validate = validator.New()
 
 func Var(field interface{}, tag string) error {
 	return validate.Var(field, tag)

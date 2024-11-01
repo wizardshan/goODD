@@ -3,9 +3,14 @@ package controller
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"goODD/chapter6/controller/response"
 	"net/http"
 )
+
+func init() {
+	binding.Validator = nil
+}
 
 type HandlerFunc func(c *gin.Context) (response.Data, error)
 
